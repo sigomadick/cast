@@ -1,0 +1,63 @@
+
+local ui = Cast.new("Cast UI Demo")
+ui:Begin()
+ui:Text("Welcome to Cast UI")
+ui:Separator()
+ui:Spacing()
+local testBtn = ui:Button("Click Me")
+testBtn.MouseButton1Click:Connect(function()
+print("Button clicked!")
+end)
+ui:Spacing()
+ui:Separator()
+local checkbox, checked = ui:Checkbox("Enable Feature", false)
+checkbox.MouseButton1Click:Connect(function()
+checked = not checked
+print("Checkbox:", checked)
+checkbox.Text = checked and "✓" or ""
+checkbox.BackgroundColor3 = checked and Theme.SliderGrab or Theme.FrameBg
+end)
+ui:Spacing()
+local input = ui:InputText("Username", "Player1")
+input.FocusLost:Connect(function(enterPressed)
+if enterPressed then
+print("Username changed to:", input.Text)
+end
+end)
+ui:Spacing()
+local sliderValue = ui:SliderFloat("Volume", 0.5, 0, 1)
+ui:Spacing()
+local items = {"Option 1", "Option 2", "Option 3"}
+local combo = ui:Combo("Select Option", 1, items)
+ui:Spacing()
+ui:Separator()
+local colorBtn = ui:ColorEdit3("Primary Color", Color3.new(1, 0, 0))
+colorBtn.MouseButton1Click:Connect(function()
+print("Color picker clicked!")
+end)
+ui:Spacing()
+ui:Text("Inline Buttons:")
+local btn1 = ui:Button("Save")
+ui:SameLine()
+local btn2 = ui:Button("Load")
+ui:SameLine()
+local btn3 = ui:Button("Reset")
+btn1.MouseButton1Click:Connect(function() print("Save clicked") end)
+btn2.MouseButton1Click:Connect(function() print("Load clicked") end)
+btn3.MouseButton1Click:Connect(function() print("Reset clicked") end)
+ui:Spacing()
+ui:Separator()
+local child = ui:BeginChild("Settings", UDim2.new(1, -16, 0, 120), true)
+ui:Text("Advanced Settings")
+ui:Separator()
+local childCheckbox, childChecked = ui:Checkbox("Auto-save", true)
+childCheckbox.MouseButton1Click:Connect(function()
+childChecked = not childChecked
+childCheckbox.Text = childChecked and "✓" or ""
+childCheckbox.BackgroundColor3 = childChecked and Theme.SliderGrab or Theme.FrameBg
+print("Auto-save:", childChecked)
+end)
+local childSlider = ui:SliderFloat("Quality", 0.75, 0, 1)
+ui:EndChild()
+print("Cast UI initialized successfully!")
+return Cast
