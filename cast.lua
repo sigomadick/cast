@@ -68,28 +68,30 @@ function Cast.new(title, palette_name)
     self.screen_gui.ResetOnSpawn = false
     self.screen_gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
-    self.create_main_frame()
-    self.create_header()
-    self.create_tab_container()
-    self.create_content_area()
+    self:createMainFrame()
+    self:createHeader()
+    self:createTabContainer()
+    self:createContentArea()
     
     return self
 end
 
-function Cast:createframe()
-self.main_frame = Instance.new("Frame")
-self.main_frame.Size = UDim2.new(0, 800, 0, 600)
-self.main_frame.Position = UDim2.new(0.5, -400, 0.5, -300)
-self.main_frame.BackgroundColor3 = self.palette.primary
-self.main_frame.BorderSizePixel = 0
-self.main_frame.ClipsDescendants = true
-self.main_frame.Parent = self.screen_gui
-Instance.new("UICorner", self.main_frame).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", self.main_frame).Color = self.palette.border
-self:dragify(self.main_frame)
+function Cast:createMainFrame()
+    self.main_frame = Instance.new("Frame")
+    self.main_frame.Size = UDim2.new(0, 800, 0, 600)
+    self.main_frame.Position = UDim2.new(0.5, -400, 0.5, -300)
+    self.main_frame.BackgroundColor3 = self.palette.primary
+    self.main_frame.BorderSizePixel = 0
+    self.main_frame.ClipsDescendants = true
+    self.main_frame.Parent = self.screen_gui
+    
+    Instance.new("UICorner", self.main_frame).CornerRadius = UDim.new(0, 8)
+    Instance.new("UIStroke", self.main_frame).Color = self.palette.border
+    
+    self:makeDraggable(self.main_frame)
 end
 
-function Cast:create_header()
+function Cast:createHeader()
     local header = Instance.new("Frame")
     header.Name = "Header"
     header.Size = UDim2.new(1, 0, 0, 50)
@@ -109,30 +111,30 @@ function Cast:create_header()
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = header
     
-    local close_btn = Instance.new("TextButton")
-    close_btn.Size = UDim2.new(0, 30, 0, 30)
-    close_btn.Position = UDim2.new(1, -40, 0.5, -15)
-    close_btn.BackgroundTransparency = 1
-    close_btn.Text = "X"
-    close_btn.TextColor3 = self.palette.text
-    close_btn.TextSize = 18
-    close_btn.Font = Enum.Font.GothamBold
-    close_btn.Parent = header
-    close_btn.MouseButton1Click:Connect(function() self:toggle_visibility() end)
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -40, 0.5, -15)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = self.palette.text
+    closeBtn.TextSize = 18
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Parent = header
+    closeBtn.MouseButton1Click:Connect(function() self:toggleVisibility() end)
     
-    local minimize_btn = Instance.new("TextButton")
-    minimize_btn.Size = UDim2.new(0, 30, 0, 30)
-    minimize_btn.Position = UDim2.new(1, -80, 0.5, -15)
-    minimize_btn.BackgroundTransparency = 1
-    minimize_btn.Text = "_"
-    minimize_btn.TextColor3 = self.palette.text
-    minimize_btn.TextSize = 18
-    minimize_btn.Font = Enum.Font.GothamBold
-    minimize_btn.Parent = header
-    minimize_btn.MouseButton1Click:Connect(function() self:toggle_minimize() end)
+    local minimizeBtn = Instance.new("TextButton")
+    minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+    minimizeBtn.Position = UDim2.new(1, -80, 0.5, -15)
+    minimizeBtn.BackgroundTransparency = 1
+    minimizeBtn.Text = "_"
+    minimizeBtn.TextColor3 = self.palette.text
+    minimizeBtn.TextSize = 18
+    minimizeBtn.Font = Enum.Font.GothamBold
+    minimizeBtn.Parent = header
+    minimizeBtn.MouseButton1Click:Connect(function() self:toggleMinimize() end)
 end
 
-function Cast:create_tab_container()
+function Cast:createTabContainer()
     self.tab_container = Instance.new("Frame")
     self.tab_container.Size = UDim2.new(1, 0, 0, 50)
     self.tab_container.Position = UDim2.new(0, 0, 0, 50)
@@ -159,7 +161,7 @@ function Cast:create_tab_container()
     end)
 end
 
-function Cast:create_content_area()
+function Cast:createContentArea()
     self.content_area = Instance.new("Frame")
     self.content_area.Size = UDim2.new(1, 0, 1, -100)
     self.content_area.Position = UDim2.new(0, 0, 0, 100)
@@ -185,14 +187,14 @@ function Cast:create_content_area()
     end)
 end
 
-function Cast:make_draggable(frame)
-    local dragging, drag_input, start_pos, start_mouse
+function Cast:makeDraggable(frame)
+    local dragging, dragInput, startPos, startMouse
     frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
-            start_mouse = input.Position
-            start_pos = frame.Position
-            local conn; conn = input.Changed:Connect(function()
+            startMouse = input.Position
+            startPos = frame.Position
+            local conn = input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
                     conn:Disconnect()
@@ -200,48 +202,53 @@ function Cast:make_draggable(frame)
             end)
         end
     end)
+    
     frame.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
-            drag_input = input
+            dragInput = input
         end
     end)
+    
     table.insert(self.connections, UserInputService.InputChanged:Connect(function(input)
-        if dragging and input == drag_input then
-            local delta = input.Position - start_mouse
-            frame.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
+        if dragging and input == dragInput then
+            local delta = input.Position - startMouse
+            frame.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
         end
     end))
 end
 
-function Cast:add_tab(name)
+function Cast:addTab(name)
     local tab = {name = name, sections = {}, content = nil, button = nil}
     table.insert(self.tabs, tab)
     
-    local tab_button = Instance.new("TextButton")
-    tab_button.Size = UDim2.new(0, 120, 1, 0)
-    tab_button.BackgroundColor3 = self.palette.tab_inactive
-    tab_button.Text = name
-    tab_button.TextColor3 = self.palette.text
-    tab_button.TextSize = 14
-    tab_button.Font = Enum.Font.Gotham
-    tab_button.Parent = self.tab_scrolling
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(0, 120, 1, 0)
+    tabButton.BackgroundColor3 = self.palette.tab_inactive
+    tabButton.Text = name
+    tabButton.TextColor3 = self.palette.text
+    tabButton.TextSize = 14
+    tabButton.Font = Enum.Font.Gotham
+    tabButton.Parent = self.tab_scrolling
     
-    Instance.new("UICorner", tab_button).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
     
-    tab.button = tab_button
+    tab.button = tabButton
     
-    tab_button.MouseButton1Click:Connect(function()
-        self:switch_tab(tab)
+    tabButton.MouseButton1Click:Connect(function()
+        self:switchTab(tab)
     end)
     
     if #self.tabs == 1 then
-        self:switch_tab(tab)
+        self:switchTab(tab)
     end
     
     return tab
 end
 
-function Cast:switch_tab(tab)
+function Cast:switchTab(tab)
     if self.current_tab then
         self.current_tab.button.BackgroundColor3 = self.palette.tab_inactive
         if self.current_tab.content then
@@ -256,98 +263,109 @@ function Cast:switch_tab(tab)
         tab.content = Instance.new("Frame")
         tab.content.Size = UDim2.new(1, 0, 0, 0)
         tab.content.BackgroundTransparency = 1
-        local tab_layout = Instance.new("UIListLayout")
-        tab_layout.Padding = UDim.new(0, 10)
-        tab_layout.Parent = tab.content
-        tab_layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            tab.content.Size = UDim2.new(1, 0, 0, tab_layout.AbsoluteContentSize.Y)
+        
+        local tabLayout = Instance.new("UIListLayout")
+        tabLayout.Padding = UDim.new(0, 10)
+        tabLayout.Parent = tab.content
+        
+        tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            tab.content.Size = UDim2.new(1, 0, 0, tabLayout.AbsoluteContentSize.Y)
         end)
     end
     
     tab.content.Parent = self.content_scrolling
 end
 
-function Cast:get_tab(name)
+function Cast:getTab(name)
     for _, tab in ipairs(self.tabs) do
         if tab.name == name then return tab end
     end
 end
 
-function Cast:add_section(tab_name, title, collapsible)
-    local tab = self:get_tab(tab_name)
+function Cast:addSection(tabName, title, collapsible)
+    local tab = self:getTab(tabName)
     if not tab then return end
     
-    local section = {title = title, collapsible = collapsible or false, expanded = true, elements = {}, frame = nil, content_frame = nil}
+    local section = {
+        title = title,
+        collapsible = collapsible or false,
+        expanded = true,
+        elements = {},
+        frame = nil,
+        content_frame = nil
+    }
     table.insert(tab.sections, section)
     
-    local section_frame = Instance.new("Frame")
-    section_frame.Size = UDim2.new(1, 0, 0, 40)
-    section_frame.BackgroundColor3 = self.palette.primary
-    section_frame.Parent = tab.content
+    local sectionFrame = Instance.new("Frame")
+    sectionFrame.Size = UDim2.new(1, 0, 0, 40)
+    sectionFrame.BackgroundColor3 = self.palette.primary
+    sectionFrame.Parent = tab.content
     
-    Instance.new("UICorner", section_frame).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", sectionFrame).CornerRadius = UDim.new(0, 6)
     
-    local section_title = Instance.new("TextLabel")
-    section_title.Size = UDim2.new(1, -40, 0, 40)
-    section_title.Position = UDim2.new(0, 10, 0, 0)
-    section_title.BackgroundTransparency = 1
-    section_title.Text = title
-    section_title.TextColor3 = self.palette.text
-    section_title.TextSize = 16
-    section_title.Font = Enum.Font.GothamBold
-    section_title.TextXAlignment = Enum.TextXAlignment.Left
-    section_title.Parent = section_frame
+    local sectionTitle = Instance.new("TextLabel")
+    sectionTitle.Size = UDim2.new(1, -40, 0, 40)
+    sectionTitle.Position = UDim2.new(0, 10, 0, 0)
+    sectionTitle.BackgroundTransparency = 1
+    sectionTitle.Text = title
+    sectionTitle.TextColor3 = self.palette.text
+    sectionTitle.TextSize = 16
+    sectionTitle.Font = Enum.Font.GothamBold
+    sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+    sectionTitle.Parent = sectionFrame
     
-    local content_frame = Instance.new("Frame")
-    content_frame.Size = UDim2.new(1, -20, 0, 0)
-    content_frame.Position = UDim2.new(0, 10, 0, 40)
-    content_frame.BackgroundTransparency = 1
-    content_frame.ClipsDescendants = true
-    content_frame.Parent = section_frame
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -20, 0, 0)
+    contentFrame.Position = UDim2.new(0, 10, 0, 40)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.ClipsDescendants = true
+    contentFrame.Parent = sectionFrame
     
-    local content_layout = Instance.new("UIListLayout")
-    content_layout.Padding = UDim.new(0, 5)
-    content_layout.Parent = content_frame
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.Padding = UDim.new(0, 5)
+    contentLayout.Parent = contentFrame
     
-    section.frame = section_frame
-    section.content_frame = content_frame
+    section.frame = sectionFrame
+    section.content_frame = contentFrame
     
-    local function update_section_size()
-        local height = 40 + (section.expanded and content_layout.AbsoluteContentSize.Y + 10 or 0)
-        section_frame.Size = UDim2.new(1, 0, 0, height)
+    local function updateSectionSize()
+        local height = 40 + (section.expanded and contentLayout.AbsoluteContentSize.Y + 10 or 0)
+        sectionFrame.Size = UDim2.new(1, 0, 0, height)
     end
     
-    content_layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(update_section_size)
+    contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionSize)
     
     if collapsible then
-        local toggle_btn = Instance.new("TextButton")
-        toggle_btn.Size = UDim2.new(0, 30, 0, 40)
-        toggle_btn.Position = UDim2.new(1, -40, 0, 0)
-        toggle_btn.BackgroundTransparency = 1
-        toggle_btn.Text = "▼"
-        toggle_btn.TextColor3 = self.palette.text
-        toggle_btn.TextSize = 16
-        toggle_btn.Font = Enum.Font.GothamBold
-        toggle_btn.Parent = section_frame
+        local toggleBtn = Instance.new("TextButton")
+        toggleBtn.Size = UDim2.new(0, 30, 0, 40)
+        toggleBtn.Position = UDim2.new(1, -40, 0, 0)
+        toggleBtn.BackgroundTransparency = 1
+        toggleBtn.Text = "▼"
+        toggleBtn.TextColor3 = self.palette.text
+        toggleBtn.TextSize = 16
+        toggleBtn.Font = Enum.Font.GothamBold
+        toggleBtn.Parent = sectionFrame
         
-        toggle_btn.MouseButton1Click:Connect(function()
+        toggleBtn.MouseButton1Click:Connect(function()
             section.expanded = not section.expanded
-            toggle_btn.Text = section.expanded and "▼" or "▶"
-            TweenService:Create(content_frame, TweenInfo.new(0.2), {Size = UDim2.new(1, -20, 0, section.expanded and content_layout.AbsoluteContentSize.Y or 0)}):Play()
-            update_section_size()
+            toggleBtn.Text = section.expanded and "▼" or "▶"
+            TweenService:Create(contentFrame, TweenInfo.new(0.2), {
+                Size = UDim2.new(1, -20, 0, section.expanded and contentLayout.AbsoluteContentSize.Y or 0)
+            }):Play()
+            updateSectionSize()
         end)
     end
-    update_section_size()
     
+    updateSectionSize()
     return section
 end
 
-function Cast:add_label(section, text, is_secondary)
+function Cast:addLabel(section, text, isSecondary)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0, 20)
     label.BackgroundTransparency = 1
     label.Text = text
-    label.TextColor3 = is_secondary and self.palette.text_secondary or self.palette.text
+    label.TextColor3 = isSecondary and self.palette.text_secondary or self.palette.text
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
@@ -357,7 +375,7 @@ function Cast:add_label(section, text, is_secondary)
     return label
 end
 
-function Cast:add_button(section, text, callback)
+function Cast:addButton(section, text, callback)
     local button = Instance.new("TextButton")
     button.Size = UDim2.new(1, 0, 0, 35)
     button.BackgroundColor3 = self.palette.accent
@@ -374,22 +392,26 @@ function Cast:add_button(section, text, callback)
     end)
     
     button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.1), {BackgroundColor3 = self.palette.accent:Lerp(Color3.new(1,1,1), 0.1)}):Play()
+        TweenService:Create(button, TweenInfo.new(0.1), {
+            BackgroundColor3 = self.palette.accent:Lerp(Color3.new(1, 1, 1), 0.1)
+        }):Play()
     end)
     
     button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.1), {BackgroundColor3 = self.palette.accent}):Play()
+        TweenService:Create(button, TweenInfo.new(0.1), {
+            BackgroundColor3 = self.palette.accent
+        }):Play()
     end)
     
     table.insert(section.elements, button)
     return button
 end
 
-function Cast:add_toggle(section, text, default_value, callback)
-    local toggle_frame = Instance.new("Frame")
-    toggle_frame.Size = UDim2.new(1, 0, 0, 30)
-    toggle_frame.BackgroundTransparency = 1
-    toggle_frame.Parent = section.content_frame
+function Cast:addToggle(section, text, defaultValue, callback)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(1, 0, 0, 30)
+    toggleFrame.BackgroundTransparency = 1
+    toggleFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.8, 0, 1, 0)
@@ -399,49 +421,53 @@ function Cast:add_toggle(section, text, default_value, callback)
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = toggle_frame
+    label.Parent = toggleFrame
     
-    local toggle_button = Instance.new("Frame")
-    toggle_button.Size = UDim2.new(0, 40, 0, 20)
-    toggle_button.Position = UDim2.new(1, -40, 0.5, -10)
-    toggle_button.BackgroundColor3 = self.palette.border
-    toggle_button.Parent = toggle_frame
+    local toggleButton = Instance.new("Frame")
+    toggleButton.Size = UDim2.new(0, 40, 0, 20)
+    toggleButton.Position = UDim2.new(1, -40, 0.5, -10)
+    toggleButton.BackgroundColor3 = self.palette.border
+    toggleButton.Parent = toggleFrame
     
-    Instance.new("UICorner", toggle_button).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(1, 0)
     
-    local toggle_knob = Instance.new("Frame")
-    toggle_knob.Size = UDim2.new(0, 18, 0, 18)
-    toggle_knob.Position = default_value and UDim2.new(1, -19, 0.5, -9) or UDim2.new(0, 1, 0.5, -9)
-    toggle_knob.BackgroundColor3 = self.palette.text
-    toggle_knob.Parent = toggle_button
+    local toggleKnob = Instance.new("Frame")
+    toggleKnob.Size = UDim2.new(0, 18, 0, 18)
+    toggleKnob.Position = defaultValue and UDim2.new(1, -19, 0.5, -9) or UDim2.new(0, 1, 0.5, -9)
+    toggleKnob.BackgroundColor3 = self.palette.text
+    toggleKnob.Parent = toggleButton
     
-    Instance.new("UICorner", toggle_knob).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", toggleKnob).CornerRadius = UDim.new(1, 0)
     
-    local state = default_value or false
-    toggle_button.BackgroundColor3 = state and self.palette.success or self.palette.border
+    local state = defaultValue or false
+    toggleButton.BackgroundColor3 = state and self.palette.success or self.palette.border
     
-    local click = Instance.new("TextButton")
-    click.Size = UDim2.new(1, 0, 1, 0)
-    click.BackgroundTransparency = 1
-    click.Text = ""
-    click.Parent = toggle_frame
+    local clickButton = Instance.new("TextButton")
+    clickButton.Size = UDim2.new(1, 0, 1, 0)
+    clickButton.BackgroundTransparency = 1
+    clickButton.Text = ""
+    clickButton.Parent = toggleFrame
     
-    click.MouseButton1Click:Connect(function()
+    clickButton.MouseButton1Click:Connect(function()
         state = not state
-        TweenService:Create(toggle_knob, TweenInfo.new(0.15), {Position = state and UDim2.new(1, -19, 0.5, -9) or UDim2.new(0, 1, 0.5, -9)}):Play()
-        TweenService:Create(toggle_button, TweenInfo.new(0.15), {BackgroundColor3 = state and self.palette.success or self.palette.border}):Play()
+        TweenService:Create(toggleKnob, TweenInfo.new(0.15), {
+            Position = state and UDim2.new(1, -19, 0.5, -9) or UDim2.new(0, 1, 0.5, -9)
+        }):Play()
+        TweenService:Create(toggleButton, TweenInfo.new(0.15), {
+            BackgroundColor3 = state and self.palette.success or self.palette.border
+        }):Play()
         pcall(callback, state)
     end)
     
-    table.insert(section.elements, toggle_frame)
-    return toggle_frame
+    table.insert(section.elements, toggleFrame)
+    return toggleFrame
 end
 
-function Cast:add_dropdown(section, text, options, default_value, callback)
-    local dropdown_frame = Instance.new("Frame")
-    dropdown_frame.Size = UDim2.new(1, 0, 0, 30)
-    dropdown_frame.BackgroundTransparency = 1
-    dropdown_frame.Parent = section.content_frame
+function Cast:addDropdown(section, text, options, defaultValue, callback)
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Size = UDim2.new(1, 0, 0, 30)
+    dropdownFrame.BackgroundTransparency = 1
+    dropdownFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.8, 0, 1, 0)
@@ -451,94 +477,96 @@ function Cast:add_dropdown(section, text, options, default_value, callback)
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = dropdown_frame
+    label.Parent = dropdownFrame
     
-    local selected_text = Instance.new("TextLabel")
-    selected_text.Size = UDim2.new(0, 150, 0, 30)
-    selected_text.Position = UDim2.new(1, -150, 0, 0)
-    selected_text.BackgroundColor3 = self.palette.secondary
-    selected_text.Text = default_value or options[1] or ""
-    selected_text.TextColor3 = self.palette.text
-    selected_text.TextSize = 14
-    selected_text.Font = Enum.Font.Gotham
-    selected_text.TextXAlignment = Enum.TextXAlignment.Center
-    selected_text.Parent = dropdown_frame
+    local selectedText = Instance.new("TextLabel")
+    selectedText.Size = UDim2.new(0, 150, 0, 30)
+    selectedText.Position = UDim2.new(1, -150, 0, 0)
+    selectedText.BackgroundColor3 = self.palette.secondary
+    selectedText.Text = defaultValue or options[1] or ""
+    selectedText.TextColor3 = self.palette.text
+    selectedText.TextSize = 14
+    selectedText.Font = Enum.Font.Gotham
+    selectedText.TextXAlignment = Enum.TextXAlignment.Center
+    selectedText.Parent = dropdownFrame
     
-    Instance.new("UICorner", selected_text).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", selected_text).Color = self.palette.border
+    Instance.new("UICorner", selectedText).CornerRadius = UDim.new(0, 6)
+    Instance.new("UIStroke", selectedText).Color = self.palette.border
     
-    local dropdown_list = Instance.new("ScrollingFrame")
-    dropdown_list.Size = UDim2.new(0, 150, 0, 0)
-    dropdown_list.Position = UDim2.new(1, -150, 0, 30)
-    dropdown_list.BackgroundColor3 = self.palette.secondary
-    dropdown_list.BorderSizePixel = 0
-    dropdown_list.ScrollBarThickness = 4
-    dropdown_list.ScrollBarImageColor3 = self.palette.border
-    dropdown_list.Visible = false
-    dropdown_list.ClipsDescendants = true
-    dropdown_list.Parent = dropdown_frame
+    local dropdownList = Instance.new("ScrollingFrame")
+    dropdownList.Size = UDim2.new(0, 150, 0, 0)
+    dropdownList.Position = UDim2.new(1, -150, 0, 30)
+    dropdownList.BackgroundColor3 = self.palette.secondary
+    dropdownList.BorderSizePixel = 0
+    dropdownList.ScrollBarThickness = 4
+    dropdownList.ScrollBarImageColor3 = self.palette.border
+    dropdownList.Visible = false
+    dropdownList.ClipsDescendants = true
+    dropdownList.Parent = dropdownFrame
     
-    Instance.new("UICorner", dropdown_list).CornerRadius = UDim.new(0, 6)
+    Instance.new("UICorner", dropdownList).CornerRadius = UDim.new(0, 6)
     
-    local list_layout = Instance.new("UIListLayout")
-    list_layout.Padding = UDim.new(0, 2)
-    list_layout.Parent = dropdown_list
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Padding = UDim.new(0, 2)
+    listLayout.Parent = dropdownList
     
-    local function update_list_size()
-        dropdown_list.CanvasSize = UDim2.new(0, 0, 0, list_layout.AbsoluteContentSize.Y)
-        TweenService:Create(dropdown_list, TweenInfo.new(0.2), {Size = UDim2.new(0, 150, 0, math.min(150, list_layout.AbsoluteContentSize.Y))}):Play()
+    local function updateListSize()
+        dropdownList.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+        TweenService:Create(dropdownList, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 150, 0, math.min(150, listLayout.AbsoluteContentSize.Y))
+        }):Play()
     end
     
     for _, option in ipairs(options) do
-        local option_btn = Instance.new("TextButton")
-        option_btn.Size = UDim2.new(0, 150, 0, 25)
-        option_btn.BackgroundColor3 = self.palette.secondary
-        option_btn.Text = option
-        option_btn.TextColor3 = self.palette.text
-        option_btn.TextSize = 14
-        option_btn.Font = Enum.Font.Gotham
-        option_btn.Parent = dropdown_list
+        local optionBtn = Instance.new("TextButton")
+        optionBtn.Size = UDim2.new(0, 150, 0, 25)
+        optionBtn.BackgroundColor3 = self.palette.secondary
+        optionBtn.Text = option
+        optionBtn.TextColor3 = self.palette.text
+        optionBtn.TextSize = 14
+        optionBtn.Font = Enum.Font.Gotham
+        optionBtn.Parent = dropdownList
         
-        option_btn.MouseButton1Click:Connect(function()
-            selected_text.Text = option
-            dropdown_list.Visible = false
+        optionBtn.MouseButton1Click:Connect(function()
+            selectedText.Text = option
+            dropdownList.Visible = false
             pcall(callback, option)
         end)
         
-        option_btn.MouseEnter:Connect(function()
-            option_btn.BackgroundColor3 = self.palette.accent
+        optionBtn.MouseEnter:Connect(function()
+            optionBtn.BackgroundColor3 = self.palette.accent
         end)
         
-        option_btn.MouseLeave:Connect(function()
-            option_btn.BackgroundColor3 = self.palette.secondary
+        optionBtn.MouseLeave:Connect(function()
+            optionBtn.BackgroundColor3 = self.palette.secondary
         end)
     end
     
-    update_list_size()
+    updateListSize()
     
-    selected_text.InputBegan:Connect(function(input)
+    selectedText.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dropdown_list.Visible = not dropdown_list.Visible
+            dropdownList.Visible = not dropdownList.Visible
         end
     end)
     
     table.insert(self.connections, UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and dropdown_list.Visible then
-            if not dropdown_frame:IsAncestorOf(Mouse.Target) and not dropdown_list:IsAncestorOf(Mouse.Target) then
-                dropdown_list.Visible = false
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and dropdownList.Visible then
+            if not dropdownFrame:IsAncestorOf(Mouse.Target) and not dropdownList:IsAncestorOf(Mouse.Target) then
+                dropdownList.Visible = false
             end
         end
     end))
     
-    table.insert(section.elements, dropdown_frame)
-    return dropdown_frame
+    table.insert(section.elements, dropdownFrame)
+    return dropdownFrame
 end
 
-function Cast:add_color_picker(section, text, default_color, callback)
-    local color_picker_frame = Instance.new("Frame")
-    color_picker_frame.Size = UDim2.new(1, 0, 0, 30)
-    color_picker_frame.BackgroundTransparency = 1
-    color_picker_frame.Parent = section.content_frame
+function Cast:addColorPicker(section, text, defaultColor, callback)
+    local colorPickerFrame = Instance.new("Frame")
+    colorPickerFrame.Size = UDim2.new(1, 0, 0, 30)
+    colorPickerFrame.BackgroundTransparency = 1
+    colorPickerFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.8, 0, 1, 0)
@@ -548,66 +576,66 @@ function Cast:add_color_picker(section, text, default_color, callback)
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = color_picker_frame
+    label.Parent = colorPickerFrame
     
     local preview = Instance.new("Frame")
     preview.Size = UDim2.new(0, 40, 0, 20)
     preview.Position = UDim2.new(1, -40, 0.5, -10)
-    preview.BackgroundColor3 = default_color or Color3.new(1, 1, 1)
-    preview.Parent = color_picker_frame
+    preview.BackgroundColor3 = defaultColor or Color3.new(1, 1, 1)
+    preview.Parent = colorPickerFrame
     
     Instance.new("UICorner", preview).CornerRadius = UDim.new(0, 4)
     Instance.new("UIStroke", preview).Color = self.palette.border
     
-    local picker_modal = Instance.new("Frame")
-    picker_modal.Size = UDim2.new(0, 250, 0, 220)
-    picker_modal.Position = UDim2.new(0.5, -125, 0.5, -110)
-    picker_modal.BackgroundColor3 = self.palette.primary
-    picker_modal.Visible = false
-    picker_modal.ZIndex = 10
-    picker_modal.Parent = self.screen_gui
+    local pickerModal = Instance.new("Frame")
+    pickerModal.Size = UDim2.new(0, 250, 0, 220)
+    pickerModal.Position = UDim2.new(0.5, -125, 0.5, -110)
+    pickerModal.BackgroundColor3 = self.palette.primary
+    pickerModal.Visible = false
+    pickerModal.ZIndex = 10
+    pickerModal.Parent = self.screen_gui
     
-    Instance.new("UICorner", picker_modal).CornerRadius = UDim.new(0, 8)
-    Instance.new("UIStroke", picker_modal).Color = self.palette.border
+    Instance.new("UICorner", pickerModal).CornerRadius = UDim.new(0, 8)
+    Instance.new("UIStroke", pickerModal).Color = self.palette.border
     
-    local sv_square = Instance.new("Frame")
-    sv_square.Size = UDim2.new(0, 200, 0, 150)
-    sv_square.Position = UDim2.new(0, 25, 0, 25)
-    sv_square.BackgroundColor3 = Color3.new(1, 1, 1)
-    sv_square.Parent = picker_modal
+    local svSquare = Instance.new("Frame")
+    svSquare.Size = UDim2.new(0, 200, 0, 150)
+    svSquare.Position = UDim2.new(0, 25, 0, 25)
+    svSquare.BackgroundColor3 = Color3.new(1, 1, 1)
+    svSquare.Parent = pickerModal
     
-    Instance.new("UICorner", sv_square).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", svSquare).CornerRadius = UDim.new(0, 4)
     
-    local sv_gradient_h = Instance.new("UIGradient")
-    sv_gradient_h.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 0, 0))
-    sv_gradient_h.Rotation = 0
-    sv_gradient_h.Parent = sv_square
+    local svGradientH = Instance.new("UIGradient")
+    svGradientH.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(1, 0, 0))
+    svGradientH.Rotation = 0
+    svGradientH.Parent = svSquare
     
-    local sv_gradient_v = Instance.new("UIGradient")
-    sv_gradient_v.Color = ColorSequence.new(Color3.new(0, 0, 0), Color3.new(0, 0, 0))
-    sv_gradient_v.Transparency = NumberSequence.new(0, 1)
-    sv_gradient_v.Rotation = 90
-    sv_gradient_v.Parent = sv_square
+    local svGradientV = Instance.new("UIGradient")
+    svGradientV.Color = ColorSequence.new(Color3.new(0, 0, 0), Color3.new(0, 0, 0))
+    svGradientV.Transparency = NumberSequence.new(0, 1)
+    svGradientV.Rotation = 90
+    svGradientV.Parent = svSquare
     
-    local sv_knob = Instance.new("Frame")
-    sv_knob.Size = UDim2.new(0, 10, 0, 10)
-    sv_knob.BackgroundColor3 = Color3.new(1, 1, 1)
-    sv_knob.BorderSizePixel = 2
-    sv_knob.BorderColor3 = Color3.new(0, 0, 0)
-    sv_knob.Parent = sv_square
+    local svKnob = Instance.new("Frame")
+    svKnob.Size = UDim2.new(0, 10, 0, 10)
+    svKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+    svKnob.BorderSizePixel = 2
+    svKnob.BorderColor3 = Color3.new(0, 0, 0)
+    svKnob.Parent = svSquare
     
-    Instance.new("UICorner", sv_knob).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", svKnob).CornerRadius = UDim.new(1, 0)
     
-    local hue_slider = Instance.new("Frame")
-    hue_slider.Size = UDim2.new(0, 200, 0, 15)
-    hue_slider.Position = UDim2.new(0, 25, 0, 185)
-    hue_slider.BackgroundColor3 = Color3.new(1, 1, 1)
-    hue_slider.Parent = picker_modal
+    local hueSlider = Instance.new("Frame")
+    hueSlider.Size = UDim2.new(0, 200, 0, 15)
+    hueSlider.Position = UDim2.new(0, 25, 0, 185)
+    hueSlider.BackgroundColor3 = Color3.new(1, 1, 1)
+    hueSlider.Parent = pickerModal
     
-    Instance.new("UICorner", hue_slider).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", hueSlider).CornerRadius = UDim.new(0, 4)
     
-    local hue_gradient = Instance.new("UIGradient")
-    hue_gradient.Color = ColorSequence.new{
+    local hueGradient = Instance.new("UIGradient")
+    hueGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.new(1, 0, 0)),
         ColorSequenceKeypoint.new(0.167, Color3.new(1, 1, 0)),
         ColorSequenceKeypoint.new(0.333, Color3.new(0, 1, 0)),
@@ -616,207 +644,213 @@ function Cast:add_color_picker(section, text, default_color, callback)
         ColorSequenceKeypoint.new(0.833, Color3.new(1, 0, 1)),
         ColorSequenceKeypoint.new(1, Color3.new(1, 0, 0))
     }
-    hue_gradient.Parent = hue_slider
+    hueGradient.Parent = hueSlider
     
-    local hue_knob = Instance.new("Frame")
-    hue_knob.Size = UDim2.new(0, 4, 1, 4)
-    hue_knob.Position = UDim2.new(0, 0, 0, -2)
-    hue_knob.BackgroundColor3 = Color3.new(1, 1, 1)
-    hue_knob.BorderSizePixel = 2
-    hue_knob.BorderColor3 = Color3.new(0, 0, 0)
-    hue_knob.Parent = hue_slider
+    local hueKnob = Instance.new("Frame")
+    hueKnob.Size = UDim2.new(0, 4, 1, 4)
+    hueKnob.Position = UDim2.new(0, 0, 0, -2)
+    hueKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+    hueKnob.BorderSizePixel = 2
+    hueKnob.BorderColor3 = Color3.new(0, 0, 0)
+    hueKnob.Parent = hueSlider
     
-    Instance.new("UICorner", hue_knob).CornerRadius = UDim.new(0, 2)
+    Instance.new("UICorner", hueKnob).CornerRadius = UDim.new(0, 2)
     
-    local current_color = default_color or Color3.new(1, 0, 0)
-    local h, s, v = current_color:ToHSV()
+    local currentColor = defaultColor or Color3.new(1, 0, 0)
+    local h, s, v = currentColor:ToHSV()
     
-    local function update_color()
-        current_color = Color3.fromHSV(h, s, v)
-        preview.BackgroundColor3 = current_color
-        sv_gradient_h.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromHSV(h, 1, 1))
+    local function updateColor()
+        currentColor = Color3.fromHSV(h, s, v)
+        preview.BackgroundColor3 = currentColor
+        svGradientH.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromHSV(h, 1, 1))
     end
     
-    local function set_knobs()
-        sv_knob.Position = UDim2.new(s, -5, 1 - v, -5)
-        hue_knob.Position = UDim2.new(h, -2, 0, -2)
+    local function setKnobs()
+        svKnob.Position = UDim2.new(s, -5, 1 - v, -5)
+        hueKnob.Position = UDim2.new(h, -2, 0, -2)
     end
-    set_knobs()
     
-    local sv_dragging = false
-    sv_square.InputBegan:Connect(function(input)
+    setKnobs()
+    
+    local svDragging = false
+    svSquare.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            sv_dragging = true
+            svDragging = true
         end
     end)
+    
     table.insert(self.connections, UserInputService.InputChanged:Connect(function(input)
-        if sv_dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        if svDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local rel = Vector2.new(
-                math.clamp((input.Position.X - sv_square.AbsolutePosition.X) / sv_square.AbsoluteSize.X, 0, 1),
-                math.clamp((input.Position.Y - sv_square.AbsolutePosition.Y) / sv_square.AbsoluteSize.Y, 0, 1)
+                math.clamp((input.Position.X - svSquare.AbsolutePosition.X) / svSquare.AbsoluteSize.X, 0, 1),
+                math.clamp((input.Position.Y - svSquare.AbsolutePosition.Y) / svSquare.AbsoluteSize.Y, 0, 1)
             )
             s = rel.X
             v = 1 - rel.Y
-            set_knobs()
-            update_color()
-            pcall(callback, current_color)
+            setKnobs()
+            updateColor()
+            pcall(callback, currentColor)
         end
-    end))
-    table.insert(self.connections, UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then sv_dragging = false end
     end))
     
-    local hue_dragging = false
-    hue_slider.InputBegan:Connect(function(input)
+    table.insert(self.connections, UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then svDragging = false end
+    end))
+    
+    local hueDragging = false
+    hueSlider.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            hue_dragging = true
+            hueDragging = true
         end
     end)
+    
     table.insert(self.connections, UserInputService.InputChanged:Connect(function(input)
-        if hue_dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            h = math.clamp((input.Position.X - hue_slider.AbsolutePosition.X) / hue_slider.AbsoluteSize.X, 0, 1)
-            set_knobs()
-            update_color()
-            pcall(callback, current_color)
+        if hueDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            h = math.clamp((input.Position.X - hueSlider.AbsolutePosition.X) / hueSlider.AbsoluteSize.X, 0, 1)
+            setKnobs()
+            updateColor()
+            pcall(callback, currentColor)
         end
     end))
+    
     table.insert(self.connections, UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then hue_dragging = false end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then hueDragging = false end
     end))
     
     preview.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            picker_modal.Visible = not picker_modal.Visible
+            pickerModal.Visible = not pickerModal.Visible
         end
     end)
     
     table.insert(self.connections, UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and picker_modal.Visible then
-            if not picker_modal:IsAncestorOf(Mouse.Target) then
-                picker_modal.Visible = false
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and pickerModal.Visible then
+            if not pickerModal:IsAncestorOf(Mouse.Target) then
+                pickerModal.Visible = false
             end
         end
     end))
     
-    table.insert(section.elements, color_picker_frame)
-    return color_picker_frame
+    table.insert(section.elements, colorPickerFrame)
+    return colorPickerFrame
 end
 
-function Cast:add_status(section, label_text, get_value_func, update_interval)
-    local status_frame = Instance.new("Frame")
-    status_frame.Size = UDim2.new(1, 0, 0, 30)
-    status_frame.BackgroundTransparency = 1
-    status_frame.Parent = section.content_frame
+function Cast:addStatus(section, labelText, getValueFunc, updateInterval)
+    local statusFrame = Instance.new("Frame")
+    statusFrame.Size = UDim2.new(1, 0, 0, 30)
+    statusFrame.BackgroundTransparency = 1
+    statusFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.8, 0, 1, 0)
     label.BackgroundTransparency = 1
-    label.Text = label_text
+    label.Text = labelText
     label.TextColor3 = self.palette.text
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = status_frame
+    label.Parent = statusFrame
     
-    local status_dot = Instance.new("Frame")
-    status_dot.Size = UDim2.new(0, 12, 0, 12)
-    status_dot.Position = UDim2.new(1, -30, 0.5, -6)
-    status_dot.BackgroundColor3 = self.palette.error
-    status_dot.Parent = status_frame
+    local statusDot = Instance.new("Frame")
+    statusDot.Size = UDim2.new(0, 12, 0, 12)
+    statusDot.Position = UDim2.new(1, -30, 0.5, -6)
+    statusDot.BackgroundColor3 = self.palette.error
+    statusDot.Parent = statusFrame
     
-    Instance.new("UICorner", status_dot).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", statusDot).CornerRadius = UDim.new(1, 0)
     
-    if get_value_func then
+    if getValueFunc then
         local function update()
-            local success, value = pcall(get_value_func)
+            local success, value = pcall(getValueFunc)
             if success then
-                status_dot.BackgroundColor3 = value and self.palette.success or self.palette.error
+                statusDot.BackgroundColor3 = value and self.palette.success or self.palette.error
             else
-                status_dot.BackgroundColor3 = self.palette.warning
+                statusDot.BackgroundColor3 = self.palette.warning
             end
         end
         update()
         local conn = RunService.Heartbeat:Connect(function(dt)
-            local timer = (status_frame:GetAttribute("timer") or 0) + dt
-            if timer >= (update_interval or 1) then
+            local timer = (statusFrame:GetAttribute("timer") or 0) + dt
+            if timer >= (updateInterval or 1) then
                 update()
                 timer = 0
             end
-            status_frame:SetAttribute("timer", timer)
+            statusFrame:SetAttribute("timer", timer)
         end)
         table.insert(self.connections, conn)
     end
     
-    table.insert(section.elements, status_frame)
-    return status_frame
+    table.insert(section.elements, statusFrame)
+    return statusFrame
 end
 
-function Cast:add_slider(section, label_text, min_value, max_value, default_value, callback)
-    local slider_frame = Instance.new("Frame")
-    slider_frame.Size = UDim2.new(1, 0, 0, 50)
-    slider_frame.BackgroundTransparency = 1
-    slider_frame.Parent = section.content_frame
+function Cast:addSlider(section, labelText, minValue, maxValue, defaultValue, callback)
+    local sliderFrame = Instance.new("Frame")
+    sliderFrame.Size = UDim2.new(1, 0, 0, 50)
+    sliderFrame.BackgroundTransparency = 1
+    sliderFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -60, 0, 20)
     label.BackgroundTransparency = 1
-    label.Text = label_text
+    label.Text = labelText
     label.TextColor3 = self.palette.text
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = slider_frame
+    label.Parent = sliderFrame
     
-    local value_label = Instance.new("TextLabel")
-    value_label.Size = UDim2.new(0, 60, 0, 20)
-    value_label.Position = UDim2.new(1, -60, 0, 0)
-    value_label.BackgroundTransparency = 1
-    value_label.Text = tostring(default_value or min_value)
-    value_label.TextColor3 = self.palette.text_secondary
-    value_label.TextSize = 14
-    value_label.Font = Enum.Font.Gotham
-    value_label.TextXAlignment = Enum.TextXAlignment.Right
-    value_label.Parent = slider_frame
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 60, 0, 20)
+    valueLabel.Position = UDim2.new(1, -60, 0, 0)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Text = tostring(defaultValue or minValue)
+    valueLabel.TextColor3 = self.palette.text_secondary
+    valueLabel.TextSize = 14
+    valueLabel.Font = Enum.Font.Gotham
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = sliderFrame
     
-    local slider_back = Instance.new("Frame")
-    slider_back.Size = UDim2.new(1, 0, 0, 6)
-    slider_back.Position = UDim2.new(0, 0, 1, -15)
-    slider_back.BackgroundColor3 = self.palette.border
-    slider_back.Parent = slider_frame
+    local sliderBack = Instance.new("Frame")
+    sliderBack.Size = UDim2.new(1, 0, 0, 6)
+    sliderBack.Position = UDim2.new(0, 0, 1, -15)
+    sliderBack.BackgroundColor3 = self.palette.border
+    sliderBack.Parent = sliderFrame
     
-    Instance.new("UICorner", slider_back).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", sliderBack).CornerRadius = UDim.new(1, 0)
     
-    local slider_fill = Instance.new("Frame")
-    slider_fill.Size = UDim2.new(0, 0, 1, 0)
-    slider_fill.BackgroundColor3 = self.palette.accent
-    slider_fill.Parent = slider_back
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new(0, 0, 1, 0)
+    sliderFill.BackgroundColor3 = self.palette.accent
+    sliderFill.Parent = sliderBack
     
-    Instance.new("UICorner", slider_fill).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
     
-    local value = default_value or min_value
-    local function update_visuals()
-        local percent = (value - min_value) / (max_value - min_value)
-        slider_fill.Size = UDim2.new(percent, 0, 1, 0)
-        value_label.Text = tostring(value)
+    local value = defaultValue or minValue
+    local function updateVisuals()
+        local percent = (value - minValue) / (maxValue - minValue)
+        sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        valueLabel.Text = tostring(value)
     end
-    update_visuals()
+    
+    updateVisuals()
     
     local dragging = false
-    slider_back.InputBegan:Connect(function(input)
+    sliderBack.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
-            local relative = math.clamp((input.Position.X - slider_back.AbsolutePosition.X) / slider_back.AbsoluteSize.X, 0, 1)
-            value = math.round(min_value + (max_value - min_value) * relative)
-            update_visuals()
+            local relative = math.clamp((input.Position.X - sliderBack.AbsolutePosition.X) / sliderBack.AbsoluteSize.X, 0, 1)
+            value = math.round(minValue + (maxValue - minValue) * relative)
+            updateVisuals()
             pcall(callback, value)
         end
     end)
     
     table.insert(self.connections, UserInputService.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local relative = math.clamp((input.Position.X - slider_back.AbsolutePosition.X) / slider_back.AbsoluteSize.X, 0, 1)
-            value = math.round(min_value + (max_value - min_value) * relative)
-            update_visuals()
+            local relative = math.clamp((input.Position.X - sliderBack.AbsolutePosition.X) / sliderBack.AbsoluteSize.X, 0, 1)
+            value = math.round(minValue + (maxValue - minValue) * relative)
+            updateVisuals()
             pcall(callback, value)
         end
     end))
@@ -825,15 +859,15 @@ function Cast:add_slider(section, label_text, min_value, max_value, default_valu
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end))
     
-    table.insert(section.elements, slider_frame)
-    return slider_frame
+    table.insert(section.elements, sliderFrame)
+    return sliderFrame
 end
 
-function Cast:add_keybind_display(section, text)
-    local keybind_frame = Instance.new("Frame")
-    keybind_frame.Size = UDim2.new(1, 0, 0, 30)
-    keybind_frame.BackgroundTransparency = 1
-    keybind_frame.Parent = section.content_frame
+function Cast:addKeybindDisplay(section, text)
+    local keybindFrame = Instance.new("Frame")
+    keybindFrame.Size = UDim2.new(1, 0, 0, 30)
+    keybindFrame.BackgroundTransparency = 1
+    keybindFrame.Parent = section.content_frame
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.8, 0, 1, 0)
@@ -843,90 +877,92 @@ function Cast:add_keybind_display(section, text)
     label.TextSize = 14
     label.Font = Enum.Font.Gotham
     label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = keybind_frame
+    label.Parent = keybindFrame
     
-    local held_keys_label = Instance.new("TextLabel")
-    held_keys_label.Size = UDim2.new(0, 150, 0, 30)
-    held_keys_label.Position = UDim2.new(1, -150, 0, 0)
-    held_keys_label.BackgroundColor3 = self.palette.secondary
-    held_keys_label.Text = "|"
-    held_keys_label.TextColor3 = self.palette.text
-    held_keys_label.TextSize = 14
-    held_keys_label.Font = Enum.Font.Gotham
-    held_keys_label.TextXAlignment = Enum.TextXAlignment.Center
-    held_keys_label.Parent = keybind_frame
+    local heldKeysLabel = Instance.new("TextLabel")
+    heldKeysLabel.Size = UDim2.new(0, 150, 0, 30)
+    heldKeysLabel.Position = UDim2.new(1, -150, 0, 0)
+    heldKeysLabel.BackgroundColor3 = self.palette.secondary
+    heldKeysLabel.Text = "|"
+    heldKeysLabel.TextColor3 = self.palette.text
+    heldKeysLabel.TextSize = 14
+    heldKeysLabel.Font = Enum.Font.Gotham
+    heldKeysLabel.TextXAlignment = Enum.TextXAlignment.Center
+    heldKeysLabel.Parent = keybindFrame
     
-    Instance.new("UICorner", held_keys_label).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", held_keys_label).Color = self.palette.border
+    Instance.new("UICorner", heldKeysLabel).CornerRadius = UDim.new(0, 6)
+    Instance.new("UIStroke", heldKeysLabel).Color = self.palette.border
     
-    local held_keys = {}
-    local input_blacklist = {["R"] = true, ["T"] = true, ["F"] = true, ["G"] = true, ["E"] = true}
+    local heldKeys = {}
+    local inputBlacklist = {["R"] = true, ["T"] = true, ["F"] = true, ["G"] = true, ["E"] = true}
     
-    local function update_display()
-        held_keys_label.Text = "|"
-        for key, _ in pairs(held_keys) do
-            held_keys_label.Text = held_keys_label.Text .. key .. "|"
+    local function updateDisplay()
+        heldKeysLabel.Text = "|"
+        for key, _ in pairs(heldKeys) do
+            heldKeysLabel.Text = heldKeysLabel.Text .. key .. "|"
         end
     end
     
     table.insert(self.connections, UserInputService.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Keyboard then
-            local key_name = input.KeyCode.Name
-            if not input_blacklist[key_name] then
-                held_keys[key_name] = true
-                update_display()
+            local keyName = input.KeyCode.Name
+            if not inputBlacklist[keyName] then
+                heldKeys[keyName] = true
+                updateDisplay()
             end
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-            held_keys["MB1"] = true
-            update_display()
+            heldKeys["MB1"] = true
+            updateDisplay()
         elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-            held_keys["MB2"] = true
-            update_display()
+            heldKeys["MB2"] = true
+            updateDisplay()
         elseif input.UserInputType == Enum.UserInputType.MouseWheel then
             if input.Position.Z > 0 then
-                held_keys["WheelUp"] = true
+                heldKeys["WheelUp"] = true
             else
-                held_keys["WheelDown"] = true
+                heldKeys["WheelDown"] = true
             end
-            update_display()
+            updateDisplay()
         end
     end))
     
     table.insert(self.connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Keyboard then
-            local key_name = input.KeyCode.Name
-            held_keys[key_name] = nil
-            update_display()
+            local keyName = input.KeyCode.Name
+            heldKeys[keyName] = nil
+            updateDisplay()
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-            held_keys["MB1"] = nil
-            update_display()
+            heldKeys["MB1"] = nil
+            updateDisplay()
         elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-            held_keys["MB2"] = nil
-            update_display()
+            heldKeys["MB2"] = nil
+            updateDisplay()
         elseif input.UserInputType == Enum.UserInputType.MouseWheel then
-            held_keys["WheelUp"] = nil
-            held_keys["WheelDown"] = nil
-            update_display()
+            heldKeys["WheelUp"] = nil
+            heldKeys["WheelDown"] = nil
+            updateDisplay()
         end
     end))
     
-    table.insert(section.elements, keybind_frame)
-    return keybind_frame
+    table.insert(section.elements, keybindFrame)
+    return keybindFrame
 end
 
-function Cast:toggle_visibility()
+function Cast:toggleVisibility()
     self.visible = not self.visible
     self.screen_gui.Enabled = self.visible
 end
 
-function Cast:toggle_minimize()
+function Cast:toggleMinimize()
     self.minimized = not self.minimized
-    local target_height = self.minimized and 100 or 600
-    TweenService:Create(self.main_frame, TweenInfo.new(0.3), {Size = UDim2.new(0, 800, 0, target_height)}):Play()
+    local targetHeight = self.minimized and 100 or 600
+    TweenService:Create(self.main_frame, TweenInfo.new(0.3), {
+        Size = UDim2.new(0, 800, 0, targetHeight)
+    }):Play()
 end
 
-function Cast:change_theme(palette_name)
-    self.palette = Palettes[palette_name] or Palettes.Base
+function Cast:changeTheme(paletteName)
+    self.palette = Palettes[paletteName] or Palettes.Base
     
     local function apply(element)
         if element:IsA("Frame") then
