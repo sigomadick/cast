@@ -68,10 +68,10 @@ function Cast.new(title, palette_name)
     self.screen_gui.ResetOnSpawn = false
     self.screen_gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
-    self:create_main_frame()
-    self:create_header()
-    self:create_tab_container()
-    self:create_content_area()
+    self.create_main_frame()
+    self.create_header()
+    self.create_tab_container()
+    self.create_content_area()
     
     return self
 end
@@ -88,7 +88,7 @@ function Cast:create_main_frame()
     Instance.new("UICorner", self.main_frame).CornerRadius = UDim.new(0, 8)
     Instance.new("UIStroke", self.main_frame).Color = self.palette.border
     
-    self:make_draggable(self.main_frame)
+    self.make_draggable(self.main_frame)
 end
 
 function Cast:create_header()
@@ -493,7 +493,7 @@ function Cast:add_dropdown(section, text, options, default_value, callback)
     
     for _, option in ipairs(options) do
         local option_btn = Instance.new("TextButton")
-        option_btn.Size = UDim2.new(1, 0, 0, 25)
+        option_btn.Size = UDim2.new(0, 150, 0, 25)
         option_btn.BackgroundColor3 = self.palette.secondary
         option_btn.Text = option
         option_btn.TextColor3 = self.palette.text
@@ -526,7 +526,6 @@ function Cast:add_dropdown(section, text, options, default_value, callback)
     
     table.insert(self.connections, UserInputService.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 and dropdown_list.Visible then
-            local mouse_pos = UserInputService:GetMouseLocation()
             if not dropdown_frame:IsAncestorOf(Mouse.Target) and not dropdown_list:IsAncestorOf(Mouse.Target) then
                 dropdown_list.Visible = false
             end
