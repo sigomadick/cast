@@ -76,19 +76,17 @@ function Cast.new(title, palette_name)
     return self
 end
 
-function Cast:create_main_frame()
-    self.main_frame = Instance.new("Frame")
-    self.main_frame.Size = UDim2.new(0, 800, 0, 600)
-    self.main_frame.Position = UDim2.new(0.5, -400, 0.5, -300)
-    self.main_frame.BackgroundColor3 = self.palette.primary
-    self.main_frame.BorderSizePixel = 0
-    self.main_frame.ClipsDescendants = true
-    self.main_frame.Parent = self.screen_gui
-    
-    Instance.new("UICorner", self.main_frame).CornerRadius = UDim.new(0, 8)
-    Instance.new("UIStroke", self.main_frame).Color = self.palette.border
-    
-    self.make_draggable(self.main_frame)
+function Cast:createframe()
+self.main_frame = Instance.new("Frame")
+self.main_frame.Size = UDim2.new(0, 800, 0, 600)
+self.main_frame.Position = UDim2.new(0.5, -400, 0.5, -300)
+self.main_frame.BackgroundColor3 = self.palette.primary
+self.main_frame.BorderSizePixel = 0
+self.main_frame.ClipsDescendants = true
+self.main_frame.Parent = self.screen_gui
+Instance.new("UICorner", self.main_frame).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", self.main_frame).Color = self.palette.border
+self:dragify(self.main_frame)
 end
 
 function Cast:create_header()
