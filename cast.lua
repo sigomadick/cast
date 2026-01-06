@@ -399,34 +399,41 @@ function Cast:addCheckbox(section, text, defaultValue, callback)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Parent = checkboxFrame
     
-    local checkboxBox = Instance.new("Frame")
-    checkboxBox.Size = UDim2.new(0, 20, 0, 20)
-    checkboxBox.Position = UDim2.new(1, -30, 0.5, -10)
-    checkboxBox.BackgroundColor3 = self.palette.border
-    checkboxBox.Parent = checkboxFrame
+    local checkboxButton = Instance.new("TextButton")
+    checkboxButton.Size = UDim2.new(0, 40, 0, 20)
+    checkboxButton.Position = UDim2.new(1, -50, 0.5, -10)
+    checkboxButton.BackgroundColor3 = self.palette.border
+    checkboxButton.Text = ""
+    checkboxButton.Parent = checkboxFrame
     
-    Instance.new("UICorner", checkboxBox).CornerRadius = UDim.new(0, 4)
+    Instance.new("UICorner", checkboxButton).CornerRadius = UDim.new(0, 4)
     
     local checkmark = Instance.new("TextLabel")
     checkmark.Size = UDim2.new(1, 0, 1, 0)
     checkmark.BackgroundTransparency = 1
     checkmark.Text = "✓"
     checkmark.TextColor3 = self.palette.text
-    checkmark.TextSize = 16
+    checkmark.TextSize = 14
     checkmark.Font = Enum.Font.GothamBold
     checkmark.Visible = defaultValue or false
-    checkmark.Parent = checkboxBox
+    checkmark.Parent = checkboxButton
     
     local state = defaultValue or false
     
-    checkboxBox.MouseButton1Click:Connect(function()
+    if state then
+        checkboxButton.BackgroundColor3 = self.palette.accent
+    end
+    
+    checkboxButton.MouseButton1Click:Connect(function()
         state = not state
         checkmark.Visible = state
-        checkboxBox.BackgroundColor3 = state and self.palette.accent or self.palette.border
+        if state then
+            checkboxButton.BackgroundColor3 = self.palette.accent
+        else
+            checkboxButton.BackgroundColor3 = self.palette.border
+        end
         pcall(callback, state)
     end)
-    
-    checkboxBox.BackgroundColor3 = state and self.palette.accent or self.palette.border
     
     table.insert(section.elements, checkboxFrame)
     return checkboxFrame
