@@ -5,134 +5,134 @@ local TextService = game:GetService("TextService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local Theme = {
-WindowBg = Color3.new(0.06, 0.06, 0.08),
-ChildBg = Color3.new(0.08, 0.08, 0.1),
-PopupBg = Color3.new(0.1, 0.1, 0.12),
-Border = Color3.new(0.16, 0.16, 0.2),
-FrameBg = Color3.new(0.12, 0.12, 0.16),
-FrameBgHovered = Color3.new(0.16, 0.16, 0.22),
-FrameBgActive = Color3.new(0.18, 0.18, 0.24),
-TitleBg = Color3.new(0.1, 0.1, 0.14),
-TitleBgActive = Color3.new(0.12, 0.12, 0.18),
-Button = Color3.new(0.14, 0.14, 0.2),
-ButtonHovered = Color3.new(0.2, 0.2, 0.28),
-ButtonActive = Color3.new(0.18, 0.18, 0.26),
-Text = Color3.new(0.86, 0.86, 0.86),
-TextDisabled = Color3.new(0.47, 0.47, 0.47),
-Header = Color3.new(0.16, 0.16, 0.22),
-Separator = Color3.new(0.2, 0.2, 0.26),
-SliderGrab = Color3.new(0.24, 0.47, 0.78),
-SliderGrabActive = Color3.new(0.27, 0.55, 0.86),
-CheckMark = Color3.new(0.24, 0.47, 0.78),
+window_bg = Color3.new(0.06, 0.06, 0.08),
+child_bg = Color3.new(0.08, 0.08, 0.1),
+popup_bg = Color3.new(0.1, 0.1, 0.12),
+border = Color3.new(0.16, 0.16, 0.2),
+frame_bg = Color3.new(0.12, 0.12, 0.16),
+frame_bg_hovered = Color3.new(0.16, 0.16, 0.22),
+frame_bg_active = Color3.new(0.18, 0.18, 0.24),
+title_bg = Color3.new(0.1, 0.1, 0.14),
+title_bg_active = Color3.new(0.12, 0.12, 0.18),
+button = Color3.new(0.14, 0.14, 0.2),
+button_hovered = Color3.new(0.2, 0.2, 0.28),
+button_active = Color3.new(0.18, 0.18, 0.26),
+text = Color3.new(0.86, 0.86, 0.86),
+text_disabled = Color3.new(0.47, 0.47, 0.47),
+header = Color3.new(0.16, 0.16, 0.22),
+separator = Color3.new(0.2, 0.2, 0.26),
+slider_grab = Color3.new(0.24, 0.47, 0.78),
+slider_grab_active = Color3.new(0.27, 0.55, 0.86),
+check_mark = Color3.new(0.24, 0.47, 0.78),
 }
-local Cast = {}
-Cast.__index = Cast
-local Layout = {
+local Imgui = {}
+Imgui.__index = Imgui
+local layout = {
 cursor = {x = 8, y = 8},
 indent = 0,
-sameLine = false,
-lastWidth = 0,
-lineHeight = 0,
-groupStack = {}
+same_line = false,
+last_width = 0,
+line_height = 0,
+group_stack = {}
 }
-function Layout:BeginGroup(padding)
-table.insert(self.groupStack, {x = self.cursor.x, y = self.cursor.y, indent = self.indent})
+function layout:begin_group(padding)
+table.insert(self.group_stack, {x = self.cursor.x, y = self.cursor.y, indent = self.indent})
 self.cursor.x = self.cursor.x + (padding or 8)
 self.cursor.y = self.cursor.y + (padding or 4)
 self.indent = self.indent + 8
-return #self.groupStack
+return #self.group_stack
 end
-function Layout:EndGroup()
-if #self.groupStack > 0 then
-local last = table.remove(self.groupStack)
+function layout:end_group()
+if #self.group_stack > 0 then
+local last = table.remove(self.group_stack)
 self.cursor.x = last.x
-self.cursor.y = last.y + self.lineHeight + 8
+self.cursor.y = last.y + self.line_height + 8
 self.indent = last.indent
-self.lineHeight = 0
+self.line_height = 0
 end
 end
-function Layout:SameLine(spacing)
+function layout:same_line(spacing)
 if spacing then
 self.cursor.x = self.cursor.x + spacing
 end
-self.sameLine = true
+self.same_line = true
 end
-function Layout:GetCursorPos()
-if self.sameLine then
-self.sameLine = false
-return UDim2.new(0, self.cursor.x + self.lastWidth + 4, 0, self.cursor.y)
+function layout:get_cursor_pos()
+if self.same_line then
+self.same_line = false
+return UDim2.new(0, self.cursor.x + self.last_width + 4, 0, self.cursor.y)
 end
 return UDim2.new(0, self.cursor.x, 0, self.cursor.y)
 end
-function Layout:AdvanceCursor(width, height)
-if not self.sameLine then
-self.lastWidth = width
-if height > self.lineHeight then
-self.lineHeight = height
+function layout:advance_cursor(width, height)
+if not self.same_line then
+self.last_width = width
+if height > self.line_height then
+self.line_height = height
 end
 self.cursor.y = self.cursor.y + height + 4
 else
 self.cursor.x = self.cursor.x + width + 4
-if height > self.lineHeight then
-self.lineHeight = height
+if height > self.line_height then
+self.line_height = height
 end
 end
 end
-function Cast.new(title)
-local self = setmetatable({}, Cast)
-self.title = title or "Cast UI"
+function Imgui.new(title)
+local self = setmetatable({}, Imgui)
+self.title = title or "Menu"
 self.open = true
 self.alpha = 1
 self.gui = Instance.new("ScreenGui")
-self.gui.Name = "CastUI"
+self.gui.Name = "MenuGui"
 self.gui.ResetOnSpawn = false
 self.gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 self.gui.Parent = PlayerGui
 self.window = Instance.new("Frame")
 self.window.Size = UDim2.new(0, 450, 0, 500)
 self.window.Position = UDim2.new(0.5, -225, 0.5, -250)
-self.window.BackgroundColor3 = Theme.WindowBg
+self.window.BackgroundColor3 = Theme.window_bg
 self.window.BorderSizePixel = 0
 self.window.ClipsDescendants = true
 self.window.Parent = self.gui
-local frame = Instance.new("UIStroke")
-frame.Color = Theme.Border
-frame.Thickness = 1
-frame.Parent = self.window
-self.titleBar = Instance.new("Frame")
-self.titleBar.Size = UDim2.new(1, 0, 0, 24)
-self.titleBar.BackgroundColor3 = Theme.TitleBg
-self.titleBar.BorderSizePixel = 0
-self.titleBar.Parent = self.window
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -40, 1, 0)
-titleLabel.Position = UDim2.new(0, 8, 0, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = self.title
-titleLabel.TextColor3 = Theme.Text
-titleLabel.TextSize = 14
-titleLabel.Font = Enum.Font.SourceSans
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.TextYAlignment = Enum.TextYAlignment.Center
-titleLabel.Parent = self.titleBar
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -24, 0, 0)
-closeBtn.BackgroundColor3 = Color3.new(0.78, 0.2, 0.2)
-closeBtn.Text = "×"
-closeBtn.TextColor3 = Color3.new(1,1,1)
-closeBtn.TextSize = 16
-closeBtn.Font = Enum.Font.SourceSansBold
-closeBtn.Parent = self.titleBar
-closeBtn.MouseButton1Click:Connect(function()
-self:Destroy()
+local frame_stroke = Instance.new("UIStroke")
+frame_stroke.Color = Theme.border
+frame_stroke.Thickness = 1
+frame_stroke.Parent = self.window
+self.title_bar = Instance.new("Frame")
+self.title_bar.Size = UDim2.new(1, 0, 0, 24)
+self.title_bar.BackgroundColor3 = Theme.title_bg
+self.title_bar.BorderSizePixel = 0
+self.title_bar.Parent = self.window
+local title_label = Instance.new("TextLabel")
+title_label.Size = UDim2.new(1, -40, 1, 0)
+title_label.Position = UDim2.new(0, 8, 0, 0)
+title_label.BackgroundTransparency = 1
+title_label.Text = self.title
+title_label.TextColor3 = Theme.text
+title_label.TextSize = 14
+title_label.Font = Enum.Font.SourceSans
+title_label.TextXAlignment = Enum.TextXAlignment.Left
+title_label.TextYAlignment = Enum.TextYAlignment.Center
+title_label.Parent = self.title_bar
+local close_btn = Instance.new("TextButton")
+close_btn.Size = UDim2.new(0, 24, 0, 24)
+close_btn.Position = UDim2.new(1, -24, 0, 0)
+close_btn.BackgroundColor3 = Color3.new(0.78, 0.2, 0.2)
+close_btn.Text = "×"
+close_btn.TextColor3 = Color3.new(1,1,1)
+close_btn.TextSize = 16
+close_btn.Font = Enum.Font.SourceSansBold
+close_btn.Parent = self.title_bar
+close_btn.MouseButton1Click:Connect(function()
+self:destroy()
 end)
 self.content = Instance.new("ScrollingFrame")
 self.content.Size = UDim2.new(1, -16, 1, -40)
 self.content.Position = UDim2.new(0, 8, 0, 32)
 self.content.BackgroundTransparency = 1
 self.content.ScrollBarThickness = 4
-self.content.ScrollBarImageColor3 = Theme.Border
+self.content.ScrollBarImageColor3 = Theme.border
 self.content.AutomaticCanvasSize = Enum.AutomaticSize.Y
 self.content.CanvasSize = UDim2.new(0, 0, 0, 0)
 self.content.Parent = self.window
@@ -141,12 +141,13 @@ self.canvas.Size = UDim2.new(1, 0, 0, 0)
 self.canvas.BackgroundTransparency = 1
 self.canvas.Parent = self.content
 local dragging = false
-local startPos, startMouse
+local start_pos
+local start_mouse
 self.window.InputBegan:Connect(function(input)
 if input.UserInputType == Enum.UserInputType.MouseButton1 then
 dragging = true
-startMouse = input.Position
-startPos = self.window.Position
+start_mouse = input.Position
+start_pos = self.window.Position
 end
 end)
 self.window.InputEnded:Connect(function(input)
@@ -156,30 +157,30 @@ end
 end)
 UserInputService.InputChanged:Connect(function(input)
 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-local delta = input.Position - startMouse
-self.window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+local delta = input.Position - start_mouse
+self.window.Position = UDim2.new(start_pos.X.Scale, start_pos.X.Offset + delta.X, start_pos.Y.Scale, start_pos.Y.Offset + delta.Y)
 end
 end)
 return self
 end
-function Cast:Begin()
-Layout.cursor = {x = 8, y = 8}
-Layout.indent = 0
-Layout.sameLine = false
-Layout.lastWidth = 0
-Layout.lineHeight = 0
-Layout.groupStack = {}
+function Imgui:begin()
+layout.cursor = {x = 8, y = 8}
+layout.indent = 0
+layout.same_line = false
+layout.last_width = 0
+layout.line_height = 0
+layout.group_stack = {}
 end
-function Cast:BeginChild(name, size, border)
-local groupId = Layout:BeginGroup(4)
-local pos = Layout:GetCursorPos()
+function Imgui:begin_child(name, size, border)
+local group_id = layout:begin_group(4)
+local pos = layout:get_cursor_pos()
 local child = Instance.new("Frame")
 child.Size = size or UDim2.new(1, -16, 0, 100)
 child.Position = pos
-child.BackgroundColor3 = Theme.ChildBg
+child.BackgroundColor3 = Theme.child_bg
 if border then
 local stroke = Instance.new("UIStroke")
-stroke.Color = Theme.Border
+stroke.Color = Theme.border
 stroke.Thickness = 1
 stroke.Parent = child
 end
@@ -189,251 +190,258 @@ label.Size = UDim2.new(1, -8, 0, 18)
 label.Position = UDim2.new(0, 4, 0, 2)
 label.BackgroundTransparency = 1
 label.Text = name
-label.TextColor3 = Theme.Text
+label.TextColor3 = Theme.text
 label.TextSize = 12
 label.Font = Enum.Font.SourceSans
 label.TextXAlignment = Enum.TextXAlignment.Left
 label.Parent = child
-Layout.cursor.y = Layout.cursor.y + 20
+layout.cursor.y = layout.cursor.y + 20
 end
 child.Parent = self.canvas
-Layout:AdvanceCursor(child.AbsoluteSize.X, child.AbsoluteSize.Y)
+layout:advance_cursor(child.Size.X.Offset, child.Size.Y.Offset)
 return child
 end
-function Cast:EndChild()
-Layout:EndGroup()
+function Imgui:end_child()
+layout:end_group()
 end
-function Cast:Separator()
-local pos = Layout:GetCursorPos()
+function Imgui:separator()
+local pos = layout:get_cursor_pos()
 local line = Instance.new("Frame")
 line.Size = UDim2.new(1, -16, 0, 1)
 line.Position = pos
-line.BackgroundColor3 = Theme.Separator
+line.BackgroundColor3 = Theme.separator
 line.BorderSizePixel = 0
 line.Parent = self.canvas
-Layout:AdvanceCursor(line.AbsoluteSize.X, 2)
+layout:advance_cursor(line.Size.X.Offset, 2)
 end
-function Cast:Spacing()
-local pos = Layout:GetCursorPos()
+function Imgui:spacing()
+local pos = layout:get_cursor_pos()
 local space = Instance.new("Frame")
 space.Size = UDim2.new(1, 0, 0, 8)
 space.Position = pos
 space.BackgroundTransparency = 1
 space.Parent = self.canvas
-Layout:AdvanceCursor(space.AbsoluteSize.X, 8)
+layout:advance_cursor(space.Size.X.Offset, 8)
 end
-function Cast:Text(text)
-local pos = Layout:GetCursorPos()
+function Imgui:text(text)
+local pos = layout:get_cursor_pos()
 local label = Instance.new("TextLabel")
 label.Size = UDim2.new(1, -16, 0, 20)
 label.Position = pos
 label.BackgroundTransparency = 1
 label.Text = text
-label.TextColor3 = Theme.Text
+label.TextColor3 = Theme.text
 label.TextSize = 14
 label.Font = Enum.Font.SourceSans
 label.TextXAlignment = Enum.TextXAlignment.Left
 label.TextYAlignment = Enum.TextYAlignment.Center
 label.Parent = self.canvas
-Layout:AdvanceCursor(label.AbsoluteSize.X, 20)
+layout:advance_cursor(label.Size.X.Offset, 20)
 return label
 end
-function Cast:Button(label, size)
-local pos = Layout:GetCursorPos()
+function Imgui:button(label, size)
+local pos = layout:get_cursor_pos()
 local btn = Instance.new("TextButton")
 btn.Size = size or UDim2.new(0, 0, 0, 24)
 btn.Position = pos
-btn.BackgroundColor3 = Theme.Button
+btn.BackgroundColor3 = Theme.button
 btn.Text = label
-btn.TextColor3 = Theme.Text
+btn.TextColor3 = Theme.text
 btn.TextSize = 14
 btn.Font = Enum.Font.SourceSans
 btn.AutoButtonColor = false
 btn.Parent = self.canvas
 if not size then
-local textSize = TextService:GetTextSize(label, 14, Enum.Font.SourceSans, Vector2.new(1000, 100))
-btn.Size = UDim2.new(0, textSize.X + 16, 0, 24)
+local text_size = TextService:GetTextSize(label, 14, Enum.Font.SourceSans, Vector2.new(1000, 100))
+btn.Size = UDim2.new(0, text_size.X + 16, 0, 24)
 end
 btn.MouseEnter:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.ButtonHovered}):Play()
+TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button_hovered}):Play()
 end)
 btn.MouseLeave:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.Button}):Play()
+TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button}):Play()
 end)
 btn.MouseButton1Down:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.05), {BackgroundColor3 = Theme.ButtonActive}):Play()
+TweenService:Create(btn, TweenInfo.new(0.05), {BackgroundColor3 = Theme.button_active}):Play()
 end)
 btn.MouseButton1Up:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.ButtonHovered}):Play()
+TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button_hovered}):Play()
 end)
-Layout:AdvanceCursor(btn.AbsoluteSize.X, btn.AbsoluteSize.Y)
+layout:advance_cursor(btn.Size.X.Offset, btn.Size.Y.Offset)
 return btn
 end
-function Cast:Checkbox(label, checked)
-local pos = Layout:GetCursorPos()
+function Imgui:checkbox(label, checked)
+local pos = layout:get_cursor_pos()
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(1, -16, 0, 20)
 frame.Position = pos
 frame.BackgroundTransparency = 1
 frame.Parent = self.canvas
+local checked = checked or false
 local btn = Instance.new("TextButton")
 btn.Size = UDim2.new(0, 18, 0, 18)
 btn.Position = UDim2.new(0, 0, 0.5, -9)
-btn.BackgroundColor3 = checked and Theme.SliderGrab or Theme.FrameBg
+btn.BackgroundColor3 = checked and Theme.slider_grab or Theme.frame_bg
 btn.Text = checked and "✓" or ""
-btn.TextColor3 = Theme.CheckMark
+btn.TextColor3 = Theme.check_mark
 btn.TextSize = 14
 btn.Font = Enum.Font.SourceSansBold
 btn.AutoButtonColor = false
 btn.Parent = frame
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, -24, 1, 0)
-textLabel.Position = UDim2.new(0, 24, 0, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.Text = label
-textLabel.TextColor3 = Theme.Text
-textLabel.TextSize = 14
-textLabel.Font = Enum.Font.SourceSans
-textLabel.TextXAlignment = Enum.TextXAlignment.Left
-textLabel.TextYAlignment = Enum.TextYAlignment.Center
-textLabel.Parent = frame
+btn.MouseButton1Click:Connect(function()
+checked = not checked
+btn.Text = checked and "✓" or ""
+btn.BackgroundColor3 = checked and Theme.slider_grab or Theme.frame_bg
+end)
+local text_label = Instance.new("TextLabel")
+text_label.Size = UDim2.new(1, -24, 1, 0)
+text_label.Position = UDim2.new(0, 24, 0, 0)
+text_label.BackgroundTransparency = 1
+text_label.Text = label
+text_label.TextColor3 = Theme.text
+text_label.TextSize = 14
+text_label.Font = Enum.Font.SourceSans
+text_label.TextXAlignment = Enum.TextXAlignment.Left
+text_label.TextYAlignment = Enum.TextYAlignment.Center
+text_label.Parent = frame
 btn.MouseEnter:Connect(function()
 TweenService:Create(btn, TweenInfo.new(0.1), {
-BackgroundColor3 = checked and Theme.SliderGrabActive or Theme.FrameBgHovered
+BackgroundColor3 = checked and Theme.slider_grab_active or Theme.frame_bg_hovered
 }):Play()
 end)
 btn.MouseLeave:Connect(function()
 TweenService:Create(btn, TweenInfo.new(0.1), {
-BackgroundColor3 = checked and Theme.SliderGrab or Theme.FrameBg
+BackgroundColor3 = checked and Theme.slider_grab or Theme.frame_bg
 }):Play()
 end)
-Layout:AdvanceCursor(frame.AbsoluteSize.X, frame.AbsoluteSize.Y)
-return btn, checked or false
+layout:advance_cursor(frame.Size.X.Offset, frame.Size.Y.Offset)
+return btn, function() return checked end
 end
-function Cast:InputText(label, text, width)
-local pos = Layout:GetCursorPos()
+function Imgui:input_text(label, text, width)
+local pos = layout:get_cursor_pos()
 if label then
-local labelFrame = Instance.new("TextLabel")
-labelFrame.Size = UDim2.new(1, -16, 0, 18)
-labelFrame.Position = pos
-labelFrame.BackgroundTransparency = 1
-labelFrame.Text = label
-labelFrame.TextColor3 = Theme.Text
-labelFrame.TextSize = 14
-labelFrame.Font = Enum.Font.SourceSans
-labelFrame.TextXAlignment = Enum.TextXAlignment.Left
-labelFrame.Parent = self.canvas
-Layout:AdvanceCursor(labelFrame.AbsoluteSize.X, 18)
-pos = Layout:GetCursorPos()
+local label_frame = Instance.new("TextLabel")
+label_frame.Size = UDim2.new(1, -16, 0, 18)
+label_frame.Position = pos
+label_frame.BackgroundTransparency = 1
+label_frame.Text = label
+label_frame.TextColor3 = Theme.text
+label_frame.TextSize = 14
+label_frame.Font = Enum.Font.SourceSans
+label_frame.TextXAlignment = Enum.TextXAlignment.Left
+label_frame.Parent = self.canvas
+layout:advance_cursor(label_frame.Size.X.Offset, 18)
+pos = layout:get_cursor_pos()
 end
 local input = Instance.new("TextBox")
 input.Size = width or UDim2.new(1, -16, 0, 24)
 input.Position = pos
-input.BackgroundColor3 = Theme.FrameBg
+input.BackgroundColor3 = Theme.frame_bg
 input.Text = text or ""
 input.PlaceholderText = label or "Enter text..."
-input.PlaceholderColor3 = Theme.TextDisabled
-input.TextColor3 = Theme.Text
+input.PlaceholderColor3 = Theme.text_disabled
+input.TextColor3 = Theme.text
 input.TextSize = 14
 input.Font = Enum.Font.SourceSans
 input.ClearTextOnFocus = false
 input.Parent = self.canvas
 local stroke = Instance.new("UIStroke")
-stroke.Color = Theme.Border
+stroke.Color = Theme.border
 stroke.Thickness = 1
 stroke.Parent = input
 input.Focused:Connect(function()
-TweenService:Create(stroke, TweenInfo.new(0.1), {Color = Theme.SliderGrab}):Play()
-TweenService:Create(input, TweenInfo.new(0.1), {BackgroundColor3 = Theme.FrameBgHovered}):Play()
+TweenService:Create(stroke, TweenInfo.new(0.1), {Color = Theme.slider_grab}):Play()
+TweenService:Create(input, TweenInfo.new(0.1), {BackgroundColor3 = Theme.frame_bg_hovered}):Play()
 end)
 input.FocusLost:Connect(function()
-TweenService:Create(stroke, TweenInfo.new(0.1), {Color = Theme.Border}):Play()
-TweenService:Create(input, TweenInfo.new(0.1), {BackgroundColor3 = Theme.FrameBg}):Play()
+TweenService:Create(stroke, TweenInfo.new(0.1), {Color = Theme.border}):Play()
+TweenService:Create(input, TweenInfo.new(0.1), {BackgroundColor3 = Theme.frame_bg}):Play()
 end)
-Layout:AdvanceCursor(input.AbsoluteSize.X, input.AbsoluteSize.Y)
-return input
+layout:advance_cursor(input.Size.X.Offset, input.Size.Y.Offset)
+return input, function() return input.Text end
 end
-function Cast:SliderFloat(label, value, min, max, format)
-local pos = Layout:GetCursorPos()
+function Imgui:slider_float(label, value, min, max, format)
+local pos = layout:get_cursor_pos()
 local container = Instance.new("Frame")
 container.Size = UDim2.new(1, -16, 0, 40)
 container.Position = pos
 container.BackgroundTransparency = 1
 container.Parent = self.canvas
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, 0, 0, 18)
-textLabel.Position = UDim2.new(0, 0, 0, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.Text = label
-textLabel.TextColor3 = Theme.Text
-textLabel.TextSize = 14
-textLabel.Font = Enum.Font.SourceSans
-textLabel.TextXAlignment = Enum.TextXAlignment.Left
-textLabel.Parent = container
-local valueLabel = Instance.new("TextLabel")
-valueLabel.Size = UDim2.new(0, 60, 0, 18)
-valueLabel.Position = UDim2.new(1, -60, 0, 0)
-valueLabel.BackgroundTransparency = 1
-valueLabel.Text = string.format(format or "%.2f", value)
-valueLabel.TextColor3 = Theme.Text
-valueLabel.TextSize = 14
-valueLabel.Font = Enum.Font.SourceSans
-valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-valueLabel.Parent = container
-local sliderTrack = Instance.new("Frame")
-sliderTrack.Size = UDim2.new(1, 0, 0, 4)
-sliderTrack.Position = UDim2.new(0, 0, 0, 26)
-sliderTrack.BackgroundColor3 = Theme.FrameBg
-sliderTrack.BorderSizePixel = 0
-sliderTrack.Parent = container
-local sliderFill = Instance.new("Frame")
-sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-sliderFill.BackgroundColor3 = Theme.SliderGrab
-sliderFill.BorderSizePixel = 0
-sliderFill.Parent = sliderTrack
-local sliderBtn = Instance.new("TextButton")
-sliderBtn.Size = UDim2.new(0, 12, 0, 12)
-sliderBtn.Position = UDim2.new((value - min) / (max - min), -6, 0.5, -6)
-sliderBtn.BackgroundColor3 = Color3.new(1,1,1)
-sliderBtn.Text = ""
-sliderBtn.Parent = sliderTrack
+local text_label = Instance.new("TextLabel")
+text_label.Size = UDim2.new(1, 0, 0, 18)
+text_label.Position = UDim2.new(0, 0, 0, 0)
+text_label.BackgroundTransparency = 1
+text_label.Text = label
+text_label.TextColor3 = Theme.text
+text_label.TextSize = 14
+text_label.Font = Enum.Font.SourceSans
+text_label.TextXAlignment = Enum.TextXAlignment.Left
+text_label.Parent = container
+local value_label = Instance.new("TextLabel")
+value_label.Size = UDim2.new(0, 60, 0, 18)
+value_label.Position = UDim2.new(1, -60, 0, 0)
+value_label.BackgroundTransparency = 1
+value_label.Text = string.format(format or "%.2f", value)
+value_label.TextColor3 = Theme.text
+value_label.TextSize = 14
+value_label.Font = Enum.Font.SourceSans
+value_label.TextXAlignment = Enum.TextXAlignment.Right
+value_label.Parent = container
+local slider_track = Instance.new("Frame")
+slider_track.Size = UDim2.new(1, 0, 0, 4)
+slider_track.Position = UDim2.new(0, 0, 0, 26)
+slider_track.BackgroundColor3 = Theme.frame_bg
+slider_track.BorderSizePixel = 0
+slider_track.Parent = container
+local slider_fill = Instance.new("Frame")
+slider_fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+slider_fill.BackgroundColor3 = Theme.slider_grab
+slider_fill.BorderSizePixel = 0
+slider_fill.Parent = slider_track
+local slider_btn = Instance.new("TextButton")
+slider_btn.Size = UDim2.new(0, 12, 0, 12)
+slider_btn.Position = UDim2.new((value - min) / (max - min), -6, 0.5, -6)
+slider_btn.BackgroundColor3 = Color3.new(1,1,1)
+slider_btn.Text = ""
+slider_btn.Parent = slider_track
 local dragging = false
-local currentValue = value
-local function updateSlider(mouseX)
-local relativeX = (mouseX - sliderTrack.AbsolutePosition.X) / sliderTrack.AbsoluteSize.X
-relativeX = math.clamp(relativeX, 0, 1)
-currentValue = min + (max - min) * relativeX
-currentValue = math.floor(currentValue * 100) / 100
-sliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
-sliderBtn.Position = UDim2.new(relativeX, -6, 0.5, -6)
-valueLabel.Text = string.format(format or "%.2f", currentValue)
+local current_value = value
+local function update_slider(mouse_x)
+local relative_x = (mouse_x - slider_track.AbsolutePosition.X) / slider_track.AbsoluteSize.X
+relative_x = math.clamp(relative_x, 0, 1)
+current_value = min + (max - min) * relative_x
+current_value = math.floor(current_value * 100) / 100
+slider_fill.Size = UDim2.new(relative_x, 0, 1, 0)
+slider_btn.Position = UDim2.new(relative_x, -6, 0.5, -6)
+value_label.Text = string.format(format or "%.2f", current_value)
 end
-sliderBtn.MouseButton1Down:Connect(function()
+slider_btn.MouseButton1Down:Connect(function()
 dragging = true
-TweenService:Create(sliderBtn, TweenInfo.new(0.1), {Size = UDim2.new(0, 16, 0, 16)}):Play()
-TweenService:Create(sliderBtn, TweenInfo.new(0.1), {Position = UDim2.new((currentValue - min) / (max - min), -8, 0.5, -8)}):Play()
+TweenService:Create(slider_btn, TweenInfo.new(0.1), {Size = UDim2.new(0, 16, 0, 16)}):Play()
+TweenService:Create(slider_btn, TweenInfo.new(0.1), {Position = UDim2.new((current_value - min) / (max - min), -8, 0.5, -8)}):Play()
 end)
 UserInputService.InputEnded:Connect(function(input)
 if input.UserInputType == Enum.UserInputType.MouseButton1 then
 dragging = false
-TweenService:Create(sliderBtn, TweenInfo.new(0.1), {Size = UDim2.new(0, 12, 0, 12)}):Play()
-TweenService:Create(sliderBtn, TweenInfo.new(0.1), {Position = UDim2.new((currentValue - min) / (max - min), -6, 0.5, -6)}):Play()
+TweenService:Create(slider_btn, TweenInfo.new(0.1), {Size = UDim2.new(0, 12, 0, 12)}):Play()
+TweenService:Create(slider_btn, TweenInfo.new(0.1), {Position = UDim2.new((current_value - min) / (max - min), -6, 0.5, -6)}):Play()
 end
 end)
 UserInputService.InputChanged:Connect(function(input)
 if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-updateSlider(input.Position.X)
+update_slider(input.Position.X)
 end
 end)
-sliderTrack.MouseButton1Down:Connect(function(x, y)
-updateSlider(x)
+slider_track.MouseButton1Down:Connect(function()
+local mouse = UserInputService:GetMouseLocation()
+update_slider(mouse.X)
 dragging = true
 end)
-Layout:AdvanceCursor(container.AbsoluteSize.X, container.AbsoluteSize.Y)
-return currentValue
+layout:advance_cursor(container.Size.X.Offset, container.Size.Y.Offset)
+return function() return current_value end
 end
-function Cast:Combo(label, currentItem, items)
-local pos = Layout:GetCursorPos()
+function Imgui:combo(label, current_item, items)
+local pos = layout:get_cursor_pos()
 local container = Instance.new("Frame")
 container.Size = UDim2.new(1, -16, 0, 24)
 container.Position = pos
@@ -441,9 +449,9 @@ container.BackgroundTransparency = 1
 container.Parent = self.canvas
 local btn = Instance.new("TextButton")
 btn.Size = UDim2.new(1, 0, 1, 0)
-btn.BackgroundColor3 = Theme.Button
-btn.Text = items[currentItem or 1] or label or "Select..."
-btn.TextColor3 = Theme.Text
+btn.BackgroundColor3 = Theme.button
+btn.Text = items[current_item or 1] or label or "Select..."
+btn.TextColor3 = Theme.text
 btn.TextSize = 14
 btn.Font = Enum.Font.SourceSans
 btn.AutoButtonColor = false
@@ -453,7 +461,7 @@ arrow.Size = UDim2.new(0, 16, 1, 0)
 arrow.Position = UDim2.new(1, -20, 0, 0)
 arrow.BackgroundTransparency = 1
 arrow.Text = "▼"
-arrow.TextColor3 = Theme.TextDisabled
+arrow.TextColor3 = Theme.text_disabled
 arrow.TextSize = 12
 arrow.Font = Enum.Font.SourceSans
 arrow.TextYAlignment = Enum.TextYAlignment.Center
@@ -463,86 +471,125 @@ padding.PaddingLeft = UDim.new(0, 8)
 padding.PaddingRight = UDim.new(0, 24)
 padding.Parent = btn
 btn.MouseEnter:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.ButtonHovered}):Play()
+TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button_hovered}):Play()
 end)
 btn.MouseLeave:Connect(function()
-TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.Button}):Play()
+TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button}):Play()
 end)
-local dropdownOpen = false
+local dropdown_open = false
 local dropdown
 btn.MouseButton1Click:Connect(function()
-if dropdownOpen then
+if dropdown_open then
 if dropdown then dropdown:Destroy() end
-dropdownOpen = false
+dropdown_open = false
 return
 end
-dropdownOpen = true
+dropdown_open = true
 dropdown = Instance.new("Frame")
 dropdown.Size = UDim2.new(1, 0, 0, #items * 24 + 4)
 dropdown.Position = UDim2.new(0, 0, 1, 2)
-dropdown.BackgroundColor3 = Theme.PopupBg
+dropdown.BackgroundColor3 = Theme.popup_bg
 dropdown.BorderSizePixel = 0
 dropdown.ZIndex = 10
 dropdown.Parent = container
 for i, item in ipairs(items) do
-local itemBtn = Instance.new("TextButton")
-itemBtn.Size = UDim2.new(1, -4, 0, 22)
-itemBtn.Position = UDim2.new(0, 2, 0, 2 + (i-1)*24)
-itemBtn.BackgroundColor3 = Theme.Button
-itemBtn.Text = item
-itemBtn.TextColor3 = Theme.Text
-itemBtn.TextSize = 14
-itemBtn.Font = Enum.Font.SourceSans
-itemBtn.AutoButtonColor = false
-itemBtn.ZIndex = 11
-itemBtn.Parent = dropdown
-local itemPadding = Instance.new("UIPadding")
-itemPadding.PaddingLeft = UDim.new(0, 8)
-itemPadding.Parent = itemBtn
-itemBtn.MouseEnter:Connect(function()
-TweenService:Create(itemBtn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.ButtonHovered}):Play()
+local item_btn = Instance.new("TextButton")
+item_btn.Size = UDim2.new(1, -4, 0, 22)
+item_btn.Position = UDim2.new(0, 2, 0, 2 + (i-1)*24)
+item_btn.BackgroundColor3 = Theme.button
+item_btn.Text = item
+item_btn.TextColor3 = Theme.text
+item_btn.TextSize = 14
+item_btn.Font = Enum.Font.SourceSans
+item_btn.AutoButtonColor = false
+item_btn.ZIndex = 11
+item_btn.Parent = dropdown
+local item_padding = Instance.new("UIPadding")
+item_padding.PaddingLeft = UDim.new(0, 8)
+item_padding.Parent = item_btn
+item_btn.MouseEnter:Connect(function()
+TweenService:Create(item_btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button_hovered}):Play()
 end)
-itemBtn.MouseLeave:Connect(function()
-TweenService:Create(itemBtn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.Button}):Play()
+item_btn.MouseLeave:Connect(function()
+TweenService:Create(item_btn, TweenInfo.new(0.1), {BackgroundColor3 = Theme.button}):Play()
 end)
-itemBtn.MouseButton1Click:Connect(function()
+item_btn.MouseButton1Click:Connect(function()
 btn.Text = item
 dropdown:Destroy()
-dropdownOpen = false
+dropdown_open = false
 end)
 end
 end)
-Layout:AdvanceCursor(container.AbsoluteSize.X, container.AbsoluteSize.Y)
-return btn
+layout:advance_cursor(container.Size.X.Offset, container.Size.Y.Offset)
+return btn, function() return btn.Text end
 end
-function Cast:ColorEdit3(label, color)
-local pos = Layout:GetCursorPos()
+function Imgui:color_edit3(label, color)
+local pos = layout:get_cursor_pos()
 local container = Instance.new("Frame")
 container.Size = UDim2.new(1, -16, 0, 20)
 container.Position = pos
 container.BackgroundTransparency = 1
 container.Parent = self.canvas
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(1, -60, 1, 0)
-textLabel.Position = UDim2.new(0, 0, 0, 0)
-textLabel.BackgroundTransparency = 1
-textLabel.Text = label
-textLabel.TextColor3 = Theme.Text
-textLabel.TextSize = 14
-textLabel.Font = Enum.Font.SourceSans
-textLabel.TextXAlignment = Enum.TextXAlignment.Left
-textLabel.TextYAlignment = Enum.TextYAlignment.Center
-textLabel.Parent = container
-local colorBtn = Instance.new("TextButton")
-colorBtn.Size = UDim2.new(0, 40, 0, 16)
-colorBtn.Position = UDim2.new(1, -42, 0.5, -8)
-colorBtn.BackgroundColor3 = color or Color3.new(1,1,1)
-colorBtn.Text = ""
-colorBtn.Parent = container
-Layout:AdvanceCursor(container.AbsoluteSize.X, container.AbsoluteSize.Y)
-return colorBtn
+local text_label = Instance.new("TextLabel")
+text_label.Size = UDim2.new(1, -60, 1, 0)
+text_label.Position = UDim2.new(0, 0, 0, 0)
+text_label.BackgroundTransparency = 1
+text_label.Text = label
+text_label.TextColor3 = Theme.text
+text_label.TextSize = 14
+text_label.Font = Enum.Font.SourceSans
+text_label.TextXAlignment = Enum.TextXAlignment.Left
+text_label.TextYAlignment = Enum.TextYAlignment.Center
+text_label.Parent = container
+local color_btn = Instance.new("TextButton")
+color_btn.Size = UDim2.new(0, 40, 0, 16)
+color_btn.Position = UDim2.new(1, -42, 0.5, -8)
+color_btn.BackgroundColor3 = color or Color3.new(1,1,1)
+color_btn.Text = ""
+color_btn.Parent = container
+layout:advance_cursor(container.Size.X.Offset, container.Size.Y.Offset)
+return color_btn, function() return color_btn.BackgroundColor3 end
 end
-function Cast:Destroy()
+function Imgui:collapsing_header(label)
+local pos = layout:get_cursor_pos()
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(1, -16, 0, 24)
+frame.Position = pos
+frame.BackgroundColor3 = Theme.header
+frame.Parent = self.canvas
+local opened = false
+local arrow = Instance.new("TextLabel")
+arrow.Size = UDim2.new(0, 16, 1, 0)
+arrow.Position = UDim2.new(0, 4, 0, 0)
+arrow.BackgroundTransparency = 1
+arrow.Text = "►"
+arrow.TextColor3 = Theme.text
+arrow.TextSize = 14
+arrow.Parent = frame
+local text_label = Instance.new("TextLabel")
+text_label.Size = UDim2.new(1, -24, 1, 0)
+text_label.Position = UDim2.new(0, 24, 0, 0)
+text_label.BackgroundTransparency = 1
+text_label.Text = label
+text_label.TextColor3 = Theme.text
+text_label.TextSize = 14
+text_label.Font = Enum.Font.SourceSans
+text_label.TextXAlignment = Enum.TextXAlignment.Left
+text_label.TextYAlignment = Enum.TextYAlignment.Center
+text_label.Parent = frame
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(1, 0, 1, 0)
+btn.BackgroundTransparency = 1
+btn.Text = ""
+btn.Parent = frame
+btn.MouseButton1Click:Connect(function()
+opened = not opened
+arrow.Text = opened and "▼" or "►"
+end)
+layout:advance_cursor(frame.Size.X.Offset, frame.Size.Y.Offset)
+return function() return opened end
+end
+function Imgui:destroy()
 if self.gui then
 self.gui:Destroy()
 end
