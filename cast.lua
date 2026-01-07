@@ -1,6 +1,3 @@
--- Cast UI v2: Sleek Cheat Menu Framework
--- Optimized for Roblox cheat menus with modern styling
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -10,37 +7,24 @@ local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- Modern Cyber/Neon Theme
 local Theme = {
-    -- Backgrounds
     WindowBg = Color3.fromRGB(13, 17, 23),
     ChildBg = Color3.fromRGB(22, 27, 34),
     PopupBg = Color3.fromRGB(30, 35, 42),
     FrameBg = Color3.fromRGB(33, 38, 45),
-    
-    -- Borders
     Border = Color3.fromRGB(48, 54, 61),
     BorderHover = Color3.fromRGB(88, 166, 255),
-    
-    -- Text
     Text = Color3.fromRGB(230, 237, 243),
     TextDisabled = Color3.fromRGB(139, 148, 158),
     TextHighlight = Color3.fromRGB(88, 166, 255),
-    
-    -- Interactive Elements
     Primary = Color3.fromRGB(88, 166, 255),
     PrimaryHover = Color3.fromRGB(105, 180, 255),
     PrimaryActive = Color3.fromRGB(66, 150, 255),
-    
     Secondary = Color3.fromRGB(48, 54, 61),
     SecondaryHover = Color3.fromRGB(64, 72, 80),
-    
-    -- Special Elements
     Accent = Color3.fromRGB(255, 123, 123),
     Success = Color3.fromRGB(56, 217, 169),
     Warning = Color3.fromRGB(255, 184, 108),
-    
-    -- Transparency
     Transparency = {
         Window = 0.95,
         Child = 0.9,
@@ -48,19 +32,10 @@ local Theme = {
     }
 }
 
--- Animation Config
-local Animation = {
-    Speed = 0.15,
-    Easing = Enum.EasingStyle.Quint,
-    HoverGlow = 0.1
-}
-
--- CastUI Class
 local Cast = {}
 Cast.__index = Cast
 
--- Layout Manager (local to each instance)
-local function createLayoutManager()
+local function createLayout()
     return {
         cursor = {x = 16, y = 16},
         indent = 0,
@@ -129,7 +104,6 @@ local function createLayoutManager()
     }
 end
 
--- UI Element Creation
 local function createRoundedFrame()
     local frame = Instance.new("Frame")
     frame.BackgroundTransparency = 1
@@ -142,7 +116,7 @@ local function createRoundedFrame()
     return frame
 end
 
-local function createGlowEffect(parent, color)
+local function createGlow(parent, color)
     local glow = Instance.new("ImageLabel")
     glow.Name = "Glow"
     glow.Size = UDim2.new(1, 16, 1, 16)
@@ -159,21 +133,17 @@ local function createGlowEffect(parent, color)
     return glow
 end
 
--- Cast UI Constructor
 function Cast.new(title, options)
     options = options or {}
     
     local self = setmetatable({}, Cast)
     
     self.title = title or "Cast UI"
-    self.open = true
     self.minimized = false
     self.watermark = options.watermark or "CAST UI"
     
-    -- Create layout manager for this instance
-    self.layout = createLayoutManager()
+    self.layout = createLayout()
     
-    -- Create main GUI
     self.gui = Instance.new("ScreenGui")
     self.gui.Name = "CastUI"
     self.gui.ResetOnSpawn = false
@@ -181,7 +151,6 @@ function Cast.new(title, options)
     self.gui.DisplayOrder = 999
     self.gui.Parent = PlayerGui
     
-    -- Main window with blur effect
     self.window = createRoundedFrame()
     self.window.Size = UDim2.new(0, 500, 0, 600)
     self.window.Position = UDim2.new(0.5, -250, 0.5, -300)
@@ -190,14 +159,12 @@ function Cast.new(title, options)
     self.window.ClipsDescendants = true
     self.window.Parent = self.gui
     
-    -- Subtle border glow
     local border = Instance.new("UIStroke")
     border.Color = Theme.Border
     border.Thickness = 1
     border.Transparency = 0.5
     border.Parent = self.window
     
-    -- Title bar with gradient
     self.titleBar = createRoundedFrame()
     self.titleBar.Size = UDim2.new(1, 0, 0, 36)
     self.titleBar.BackgroundColor3 = Color3.fromRGB(20, 25, 32)
@@ -212,7 +179,6 @@ function Cast.new(title, options)
     titleGradient.Rotation = 90
     titleGradient.Parent = self.titleBar
     
-    -- Title text with shadow
     local titleShadow = Instance.new("TextLabel")
     titleShadow.Size = UDim2.new(1, 0, 1, 0)
     titleShadow.Position = UDim2.new(0, 1, 0, 1)
@@ -238,14 +204,12 @@ function Cast.new(title, options)
     titleLabel.TextYAlignment = Enum.TextYAlignment.Center
     titleLabel.Parent = self.titleBar
     
-    -- Window controls
     local controls = Instance.new("Frame")
     controls.Size = UDim2.new(0, 96, 1, 0)
     controls.Position = UDim2.new(1, -96, 0, 0)
     controls.BackgroundTransparency = 1
     controls.Parent = self.titleBar
     
-    -- Minimize button
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.new(0, 24, 0, 24)
     minBtn.Position = UDim2.new(0, 8, 0.5, -12)
@@ -262,7 +226,6 @@ function Cast.new(title, options)
     minCorner.CornerRadius = UDim.new(0, 4)
     minCorner.Parent = minBtn
     
-    -- Close button with glow
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.new(0, 24, 0, 24)
     closeBtn.Position = UDim2.new(1, -32, 0.5, -12)
@@ -279,9 +242,8 @@ function Cast.new(title, options)
     closeCorner.CornerRadius = UDim.new(0, 4)
     closeCorner.Parent = closeBtn
     
-    createGlowEffect(closeBtn, Theme.Accent)
+    createGlow(closeBtn, Theme.Accent)
     
-    -- Content area
     self.content = Instance.new("ScrollingFrame")
     self.content.Size = UDim2.new(1, -16, 1, -52)
     self.content.Position = UDim2.new(0, 8, 0, 44)
@@ -298,7 +260,6 @@ function Cast.new(title, options)
     self.canvas.BackgroundTransparency = 1
     self.canvas.Parent = self.content
     
-    -- Bottom watermark
     local watermark = Instance.new("TextLabel")
     watermark.Size = UDim2.new(1, 0, 0, 20)
     watermark.Position = UDim2.new(0, 0, 1, -20)
@@ -312,29 +273,28 @@ function Cast.new(title, options)
     watermark.TextYAlignment = Enum.TextYAlignment.Center
     watermark.Parent = self.window
     
-    -- Interactive effects
     local hoverAnim = function(btn, targetColor)
         btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(Animation.Speed, Animation.Easing), {
+            TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {
                 BackgroundTransparency = 0.3,
                 BackgroundColor3 = targetColor
             }):Play()
         end)
         
         btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(Animation.Speed, Animation.Easing), {
+            TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {
                 BackgroundTransparency = 0.5
             }):Play()
         end)
         
         btn.MouseButton1Down:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.1, Animation.Easing), {
+            TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {
                 BackgroundTransparency = 0.2
             }):Play()
         end)
         
         btn.MouseButton1Up:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.1, Animation.Easing), {
+            TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {
                 BackgroundTransparency = 0.3
             }):Play()
         end)
@@ -343,7 +303,6 @@ function Cast.new(title, options)
     hoverAnim(minBtn, Theme.SecondaryHover)
     hoverAnim(closeBtn, Color3.fromRGB(255, 100, 100))
     
-    -- Button functionality
     minBtn.MouseButton1Click:Connect(function()
         self:ToggleMinimize()
     end)
@@ -352,14 +311,6 @@ function Cast.new(title, options)
         self:Destroy()
     end)
     
-    -- Window dragging
-    self:SetupDragging()
-    
-    return self
-end
-
--- Window Dragging
-function Cast:SetupDragging()
     local dragging = false
     local dragInput, dragStart, startPos
     
@@ -396,9 +347,30 @@ function Cast:SetupDragging()
             update(input)
         end
     end)
+    
+    return self
 end
 
--- UI Elements
+function Cast:ToggleMinimize()
+    self.minimized = not self.minimized
+    
+    local targetSize = self.minimized and UDim2.new(1, 0, 0, 36) or UDim2.new(0, 500, 0, 600)
+    local targetPos = self.minimized and UDim2.new(0, 8, 0, 8) or UDim2.new(0.5, -250, 0.5, -300)
+    
+    TweenService:Create(self.window, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+        Size = targetSize,
+        Position = targetPos
+    }):Play()
+    
+    self.content.Visible = not self.minimized
+end
+
+function Cast:Destroy()
+    if self.gui then
+        self.gui:Destroy()
+    end
+end
+
 function Cast:Begin()
     self.layout:Reset()
 end
@@ -465,10 +437,9 @@ function Cast:Section(name, collapsed)
         arrow.Text = isCollapsed and "▸" or "▾"
         content.Visible = not isCollapsed
         
-        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quint)
         local targetSize = isCollapsed and 40 or (40 + content.AbsoluteSize.Y + 8)
         
-        TweenService:Create(section, tweenInfo, {
+        TweenService:Create(section, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
             Size = UDim2.new(1, -16, 0, targetSize)
         }):Play()
     end)
@@ -508,38 +479,36 @@ function Cast:Button(label, options)
     btnText.AutoButtonColor = false
     btnText.Parent = btn
     
-    createGlowEffect(btn, btn.BackgroundColor3)
+    createGlow(btn, btn.BackgroundColor3)
     
-    -- Hover effects
     btnText.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(Animation.Speed, Animation.Easing), {
+        TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {
             BackgroundTransparency = 0.3,
             BackgroundColor3 = options.color and options.color:Lerp(Color3.new(1, 1, 1), 0.1) or Theme.PrimaryHover
         }):Play()
     end)
     
     btnText.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(Animation.Speed, Animation.Easing), {
+        TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quint), {
             BackgroundTransparency = 0.5,
             BackgroundColor3 = options.color or Theme.Primary
         }):Play()
     end)
     
     btnText.MouseButton1Down:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.1, Animation.Easing), {
+        TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {
             BackgroundTransparency = 0.2
         }):Play()
     end)
     
     btnText.MouseButton1Up:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.1, Animation.Easing), {
+        TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Quint), {
             BackgroundTransparency = 0.3
         }):Play()
     end)
     
     self.layout:AdvanceCursor(btn.AbsoluteSize.X, btn.AbsoluteSize.Y)
     
-    -- Return the button with click event
     local buttonObj = {
         instance = btnText,
         onClick = function(callback)
@@ -689,7 +658,7 @@ function Cast:Slider(label, min, max, defaultValue, options)
     knob.ZIndex = 2
     knob.Parent = track
     
-    createGlowEffect(knob, fill.BackgroundColor3)
+    createGlow(knob, fill.BackgroundColor3)
     
     local dragging = false
     local currentValue = defaultValue
@@ -744,10 +713,7 @@ function Cast:Slider(label, min, max, defaultValue, options)
     
     return {
         getValue = function() return currentValue end,
-        setValue = updateSlider,
-        onChange = function(callback)
-            -- This would need event system implementation
-        end
+        setValue = updateSlider
     }
 end
 
@@ -869,7 +835,6 @@ function Cast:ComboBox(label, items, defaultIndex)
         }):Play()
     end)
     
-    -- Close dropdown when clicking elsewhere
     UserInputService.InputBegan:Connect(function(input)
         if dropdownOpen and input.UserInputType == Enum.UserInputType.MouseButton1 then
             local mousePos = input.Position
@@ -890,10 +855,7 @@ function Cast:ComboBox(label, items, defaultIndex)
     return {
         button = comboBtn,
         getSelection = function() return labelText.Text end,
-        getIndex = function() return selectedIndex end,
-        onChange = function(callback)
-            -- Event system would be needed
-        end
+        getIndex = function() return selectedIndex end
     }
 end
 
@@ -951,29 +913,8 @@ function Cast:SameLine(spacing)
     self.layout:SameLine(spacing)
 end
 
--- Utility Methods
-function Cast:ToggleMinimize()
-    self.minimized = not self.minimized
-    
-    local targetSize = self.minimized and UDim2.new(1, 0, 0, 36) or UDim2.new(0, 500, 0, 600)
-    local targetPos = self.minimized and UDim2.new(0, 8, 0, 8) or UDim2.new(0.5, -250, 0.5, -300)
-    
-    TweenService:Create(self.window, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
-        Size = targetSize,
-        Position = targetPos
-    }):Play()
-    
-    self.content.Visible = not self.minimized
-end
-
 function Cast:SetVisibility(visible)
     self.window.Visible = visible
-end
-
-function Cast:Destroy()
-    if self.gui then
-        self.gui:Destroy()
-    end
 end
 
 return Cast
